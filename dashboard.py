@@ -11,8 +11,12 @@ import streamlit as st
 from pathlib import Path
 
 # ---------- CONFIG ----------
-DATA_PATH = Path(r"C:/Users/ianmc/OneDrive/Documents/bid_ally/EU Scraper/combined_results_fixed1.json")  # adjust if file lives elsewhere
+from pathlib import Path
 
+# Resolves to the folder that contains dashboard.py
+ROOT = Path(__file__).parent
+
+DATA_PATH = ROOT / "combined_results_fixed1.json"   
 # ---------- DATA ----------
 @st.cache_data(show_spinner=False)
 def load_data(path: Path) -> pd.DataFrame:
