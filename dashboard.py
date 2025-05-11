@@ -14,7 +14,7 @@ from pathlib import Path
 # Resolves to the folder that contains dashboard.py
 ROOT = Path(__file__).parent
 
-DATA_PATH = ROOT / "combined_results_fixed1.json"   
+DATA_PATH = ROOT / "combined_results_guam.json"   
 # ---------- DATA ----------
 @st.cache_data(show_spinner=False)
 def load_data(path: Path) -> pd.DataFrame:
