@@ -9,6 +9,8 @@ import json
 import pandas as pd
 import streamlit as st
 from pathlib import Path
+from rapidfuzz import fuzz
+
 
 # ---------- CONFIG ----------
 from pathlib import Path
@@ -60,6 +62,29 @@ filtered = df[df['source'].isin(selected_sources) & df['status'].isin(selected_s
 
 # ---------- MAIN ----------
 st.title("Bid Ally – Opportunity Overview")
+
+# ---------- FUZZY SEARCH ----------
+search_query = st.text_input("🔍 Search all fields", "").strip().lower()
+
+if search_query:
+    def fuzzy_row_match(row, threshold=70):
+        # Combine relevant fields into a single text blob
+        combined_text = ' '.join([
+            str(row.get("title", "")),
+            str(row.get("insights", "")),
+            str(row.get("swot", "")),
+            str(row.get("tags", "")),
+            ' '.join(
+                [str(b) for art in row.get("news_impacts", []) for b in art.get("impact_bullets", [])]
+            ) if row.get("news_impacts") else ""
+        ]).lower()
+
+        # Calculate fuzzy match score
+        score = fuzz.partial_ratio(search_query, combined_text)
+        return score >= threshold
+
+    filtered = filtered[filtered.apply(lambda row: fuzzy_row_match(row), axis=1)]
+
 
 # KPI row
 col1, col2, col3 = st.columns(3)
