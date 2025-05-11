@@ -54,7 +54,7 @@ all_statuses = sorted(df['status'].dropna().unique())
 selected_statuses = st.sidebar.multiselect("Status", all_statuses, default=all_statuses)
 
 # Insights filter
-only_with_insights = st.sidebar.checkbox("Only show rows with GPT insights")
+only_with_insights = st.sidebar.checkbox("Only show rows with insights")
 
 # Apply filters
 filtered = df[df['source'].isin(selected_sources) & df['status'].isin(selected_statuses)]
