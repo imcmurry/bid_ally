@@ -66,7 +66,11 @@ if only_with_insights:
 st.title("Bid Ally – Opportunity Overview")
 
 # ---------- FUZZY SEARCH ----------
-search_query = st.text_input("🔍 Search all fields", "").strip().lower()
+search_query = st.text_input(
+    "🔍 Search",
+    "",
+    placeholder="e.g. Ukraine, drones, medical logistics, construction, demining et."
+).strip().lower()
 
 if search_query:
     def fuzzy_row_match(row, threshold=70):
