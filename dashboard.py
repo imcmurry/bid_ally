@@ -1,9 +1,5 @@
 
-"""dashboard.py – Bid Ally prototype Streamlit dashboard
-Run with:  streamlit run dashboard.py
-Requirements:
-    pip install streamlit pandas
-"""
+
 
 import json
 import pandas as pd
