@@ -69,7 +69,7 @@ st.title("Bid Ally – Opportunity Overview")
 search_query = st.text_input(
     "🔍 Search",
     "",
-    placeholder="e.g. Ukraine, drones, medical logistics, construction, demining et."
+    placeholder="e.g. Ukraine, drones, medical logistics, construction, demining etc."
 ).strip().lower()
 
 if search_query:
