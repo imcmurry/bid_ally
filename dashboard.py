@@ -98,7 +98,7 @@ col1.metric("Total Opportunities", int(filtered.shape[0]))
 open_mask = filtered['status'].str.lower().str.contains("open") | filtered['status'].str.lower().str.contains("forthcoming") | filtered['status'].str.lower().str.contains("submission")
 col2.metric("Open / Forthcoming", int(open_mask.sum()))
 with_insights = filtered['insights'].notna() & filtered['insights'].astype(str).str.len().gt(0)
-col3.metric("With GPT Insights", int(with_insights.sum()))
+col3.metric("With Insights", int(with_insights.sum()))
 
 st.markdown("---")
 
@@ -126,7 +126,7 @@ else:
 
             # Insights
             if row.get('insights'):
-                st.markdown("#### GPT Insights")
+                st.markdown("#### Insights")
                 st.write(row['insights'])
 
             # SWOT
