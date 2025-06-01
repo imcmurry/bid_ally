@@ -32,23 +32,26 @@ GPT_MODEL_EMBEDDING = "text-embedding-ada-002"
 # 2) COMPANY / TEAM DETAILS
 # ------------------------------------------------------------------------------
 company_info = {
-    "company_name": "Austability",
+    "company_name": "Acuity International",
     "core_competencies": (
-        "Expeditionary integrated base operational support services, "
-        "resource acquisition and sustainment (RAAS), and advisory & knowledge transfer (AKT) "
-        "tailored for defense and national security agencies operating in complex, conflict, and post-conflict environments."
+        "Acuity International delivers integrated mission solutions and global health services, "
+        "specializing in program and construction management, environmental remediation, base operations, "
+        "security services, occupational health, medical services, emergency and disaster response, and civil services. "
+        "Their expertise supports federal, state, and local governments in building safe, secure, healthy, and thriving communities worldwide."
     ),
     "past_performance": (
-        "Proven track record supporting Five Eyes (FVEY) alliance and allied partners with mission-critical services "
-        "in austere environments, including successful delivery of Base Operations Support Services (BOSS) contracts "
-        "in strategic regions such as Eastern Europe and the Indo-Pacific."
+        "With over 20 years of experience, Acuity International has a proven track record in providing rapid deployment, "
+        "emergency response, and comprehensive support services in challenging environments. "
+        "Their past performance includes successful delivery of medical services, disaster recovery, and base operations support "
+        "for various government agencies and international missions."
     ),
     "unique_strengths": (
-        "Deep understanding of operational environments, commitment to fostering peace and security, "
-        "and a globally acknowledged leadership backed by a network of subject matter experts. "
-        "Austability's approach emphasizes sustainable, community-empowered economic recovery and resilience in operations."
+        "Acuity International's unique strengths lie in their ability to integrate advanced technology with expert talent "
+        "to deliver tailored solutions in complex environments. Their commitment to compliance, quality management, "
+        "and rapid response capabilities positions them as a trusted partner for critical missions globally."
     ),
 }
+
 
 
 

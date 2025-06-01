@@ -379,24 +379,6 @@ def _process_eu_link(url: str) -> dict:
     }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 4) Single entry‐point: inspect URL, dispatch to SAM or EU
-# ─────────────────────────────────────────────────────────────────────────────
-
-def process_single_url(url: str) -> dict:
-    """
-    Detects whether `url` is a SAM.gov link or EU Tenders link.
-    Then calls _process_sam_link(url) or _process_eu_link(url).
-    Returns a single‐row dict ready for downstream display/storage.
-    """
-    url = url.strip()
-    if _is_sam_url(url):
-        return _process_sam_link(url)
-    elif _is_eu_url(url):
-        return _process_eu_link(url)
-    else:
-        raise ValueError(f"URL does not appear to be a SAM or EU Tenders opportunity: {url}")
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 5) (Optional) If you ever want to run this module standalone for testing:
