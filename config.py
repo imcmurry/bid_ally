@@ -2,6 +2,7 @@
 
 from dotenv import load_dotenv
 import os
+import openai
 
 load_dotenv()
 
@@ -14,6 +15,11 @@ load_dotenv()
 #    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 # For demo, we keep your existing key here (NOT recommended for production).
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+openai.api_key = OPENAI_API_KEY
+
+# If you only have a project‐scoped key, you must also specify the project ID (or organization ID).
+# Example (replace PROJECT_ID with your actual Project ID from the OpenAI dashboard):
+openai.api_project = "proj_cyHvUEE26hU3JeOc9juN6Yoh"
 
 # The GPT model used for ChatCompletion calls (you have "gpt-4o" in your script)
 GPT_MODEL_CHAT = "gpt-4o"
