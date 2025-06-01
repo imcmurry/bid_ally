@@ -1,8 +1,8 @@
 # single_solicitation.py
-
-import re
 import json
 import time
+
+import re
 from urllib.parse import urlparse, parse_qs
 
 import config
@@ -29,38 +29,33 @@ from news_relevance import article_is_relevant
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _is_sam_url(url: str) -> bool:
-    """
-    Detect if a URL is a SAM.gov opportunity link.
-    Example SAM URL patterns:
-      - https://sam.gov/opp/ABC123/view
-      - https://sam.gov/opp/ABC123/view?someParam=foo
-    """
-    return "sam.gov" in url and re.search(r"/opp/[^/]+/view", url) is not None
-
-
-def _parse_sam_id(url: str) -> str | None:
-    """
-    Extract the bid ID from a SAM.gov link.
-    E.g. 'https://sam.gov/opp/ABC123/view' → 'ABC123'
-    """
-    m = re.search(r"/opp/([^/]+)/view", url)
-    return m.group(1) if m else None
-
+    return "sam.gov" in url and "/opp/" in url
 
 def _is_eu_url(url: str) -> bool:
+    return "reference=" in url
+
+def _is_eu_guid_url(url: str) -> bool:
     """
-    Detect if a URL is an EU Tenders portal link.
-    Example EU Tenders URL patterns often include a query param `reference=31094503` (the tender reference).
+    Matches URLs like:
+      https://…/tender‐details/<GUID>‐CN?…
     """
-    return "europa.eu" in url and "reference=" in url
+    return bool(re.search(r"/tender-details/[0-9a-fA-F\-]+-CN", url))
+
+def _extract_eu_guid_reference(url: str) -> str:
+    """
+    Given:
+      https://…/tender-details/92aecb3b-f0e2-421b-9f84-5afdbd902ecf-CN?…
+    returns:
+      "92aecb3b-f0e2-421b-9f84-5afdbd902ecf-CN"
+    """
+    parsed = urlparse(url)
+    return parsed.path.rstrip("/").split("/")[-1]
 
 
 def _parse_eu_reference(url: str) -> str | None:
     """
-    Parse out the 'reference' parameter from an EU Tenders link.
-    E.g. 'https://ec.europa.eu/info/funding-tenders/opportunities/
-          portal/screen/opportunities/tender-details.html?reference=31094503'
-       → '31094503'
+    Given a URL containing "?reference=<value>", returns that <value>.
+    e.g. “?reference=92aecb3b-f0e2-421b-9f84-5afdbd902ecf-CN”.
     """
     parsed = urlparse(url)
     qs = parse_qs(parsed.query)
@@ -69,6 +64,38 @@ def _parse_eu_reference(url: str) -> str | None:
         return ref_list[0]
     return None
 
+def _parse_sam_id(url: str) -> str | None:
+    """
+    Extracts the opportunity ID from a SAM.gov URL of the form:
+      https://sam.gov/opp/<SAM_ID>/view
+    Returns the SAM_ID (e.g. “ABC123”) or None if not found.
+    """
+    m = re.search(r"/opp/([^/]+)/view", url)
+    return m.group(1) if m else None
+# ────────────────────────────────────────────────────────────────────────────
+def process_single_url(url: str) -> dict:
+    url = url.strip()
+
+    # 1) SAM link?
+    if _is_sam_url(url):
+        return _process_sam_link(url)
+
+    # 2) GUID‐style EU link ("/tender-details/<GUID>-CN?…")
+    elif _is_eu_guid_url(url):
+        ref_guid = _extract_eu_guid_reference(url)  # e.g. "92aecb3b-…-CN"
+        eu_ref_url = (
+            "https://ec.europa.eu/info/funding-tenders/opportunities/portal/"
+            f"screen/opportunities/call-details?reference={ref_guid}"
+        )
+        return _process_eu_link(eu_ref_url)
+
+    # 3) Already‐formatted "call-details?reference=<…>" link
+    elif _is_eu_url(url):
+        return _process_eu_link(url)
+
+    # 4) Not recognized
+    else:
+        raise ValueError(f"URL does not appear to be a SAM or EU Tenders opportunity: {url}")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 2) Core logic to process a SAM.gov link
