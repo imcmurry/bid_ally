@@ -4,6 +4,7 @@ import re
 import json
 import time
 from urllib.parse import urlparse, parse_qs
+import sqlite3
 
 import config
 from file_utils import (
@@ -160,11 +161,18 @@ def _process_sam_link(url: str) -> dict:
                       insights)
 
     # 2.8) Compute related‐news impacts exactly as SAM pipeline did
+    # ───────── Compute Related‐News Impacts ─────────
     news_impacts: list[dict] = []
+
     if isinstance(tags, list):
-        # Load all saved RSS articles once (this is identical to run_sam_pipeline)
-        articles = load_articles_from_db()
-        sol_text = f"{content_for_gpt} {description}"
+        try:
+            articles = load_articles_from_db()
+        except sqlite3.OperationalError as e:
+            # Table not found (or other SQLite error). Skip related-news.
+            print(f"⚠️ Skipping Related News: {e}")
+            articles = []
+
+        sol_text = f"{content_for_gpt} {description} {description_byte}"
         for art in articles:
             art_txt = f"{art['title']} {art['description']} {art.get('content_encoded','')}"
             if article_is_relevant(art["title"], art_txt, tags, sol_text):
@@ -180,8 +188,8 @@ def _process_sam_link(url: str) -> dict:
                     "impact": impact_paragraph
                 })
     else:
-        # If tags is a string (error), skip news impacts
         news_impacts = []
+
 
     # 2.9) Return exactly the same keys your SAM‐pipeline row uses
     return {
@@ -317,12 +325,20 @@ def _process_eu_link(url: str) -> dict:
     )
 
     # 3.9) Compute news impacts (reuse same logic)
+    # ───────── Compute Related‐News Impacts ─────────
     news_impacts: list[dict] = []
+
     if isinstance(tags, list):
-        articles = load_articles_from_db()
+        try:
+            articles = load_articles_from_db()
+        except sqlite3.OperationalError as e:
+            # Table not found (or other SQLite error). Skip related-news.
+            print(f"⚠️ Skipping Related News: {e}")
+            articles = []
+
         sol_text = f"{content_for_gpt} {description} {description_byte}"
         for art in articles:
-            art_txt = f"{art['title']} {art['description']} {art['content_encoded']}"
+            art_txt = f"{art['title']} {art['description']} {art.get('content_encoded','')}"
             if article_is_relevant(art["title"], art_txt, tags, sol_text):
                 impact_paragraph = _safe_call(
                     generate_news_impact_paragraph,
@@ -337,6 +353,7 @@ def _process_eu_link(url: str) -> dict:
                 })
     else:
         news_impacts = []
+
 
     # 3.10) Return a dict matching your EU pipeline’s row schema
     return {

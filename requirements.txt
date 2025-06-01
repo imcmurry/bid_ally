@@ -13,3 +13,4 @@ webdriver-manager
 streamlit
 urllib3
 certifi
+sqlite3
