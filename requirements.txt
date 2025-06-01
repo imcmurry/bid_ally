@@ -1,28 +1,15 @@
-# Core utilities and data handling
 pandas
 requests
-
-# PDF and document parsing
-PyPDF2             # Used in file_utils for PDF text extraction (extract_text_from_pdfs) :contentReference[oaicite:0]{index=0}
-PyMuPDF            # The `fitz` module used in sam_api_fetcher.parse_attachment for PDFs :contentReference[oaicite:1]{index=1}
-python-docx        # Used for .docx parsing in both sam_api_fetcher and file_utils :contentReference[oaicite:2]{index=2}
-
-# Text‐tokenization / OpenAI
-tiktoken           # Counting/truncating tokens in file_utils and gpt_analysis :contentReference[oaicite:3]{index=3} :contentReference[oaicite:4]{index=4}
-openai             # For ChatCompletion/generation in gpt_analysis and news_relevance :contentReference[oaicite:5]{index=5} :contentReference[oaicite:6]{index=6}
-
-# NLP and similarity
-rapidfuzz          # Fuzzy matching in dashboard, NSPA_scraper, etc. :contentReference[oaicite:7]{index=7} :contentReference[oaicite:8]{index=8}
-sentence-transformers  # Semantic similarity in NSPA_scraper :contentReference[oaicite:9]{index=9}
-scikit-learn       # TF-IDF and cosine similarity in news_relevance :contentReference[oaicite:10]{index=10}
-
-# Web scraping / browser automation
-selenium           # For SAM.gov and EU Tenders scraping (sam_scraper, eu_scraper) :contentReference[oaicite:11]{index=11} :contentReference[oaicite:12]{index=12}
-webdriver-manager  # Automatically installs the correct ChromeDriver for Selenium :contentReference[oaicite:13]{index=13} :contentReference[oaicite:14]{index=14}
-
-# Dashboard / UI
-streamlit          # Powers your dashboard frontend :contentReference[oaicite:15]{index=15}
-
-# Misc low-level dependencies
-urllib3            # (pulled in by requests; explicitly ensuring compatibility)
-certifi            # HTTPS certificates for requests
+PyPDF2
+PyMuPDF
+python-docx
+tiktoken
+openai
+rapidfuzz
+sentence-transformers
+scikit-learn
+selenium
+webdriver-manager
+streamlit
+urllib3
+certifi
