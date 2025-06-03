@@ -160,40 +160,45 @@ if mode == "Overview":
                     st.markdown('<div class="big-section-title">SWOT</div>', unsafe_allow_html=True)
 
                     swot_text = row['swot']
+                    sections = {"Strengths": "—", "Weaknesses": "—", "Opportunities": "—", "Threats": "—"}
 
-                    # Check if text contains clear SWOT headings
-                    if all(kw in swot_text for kw in ["Strengths:", "Weaknesses:", "Opportunities:", "Threats:"]):
-                        sections = {"Strengths": "—", "Weaknesses": "—", "Opportunities": "—", "Threats": "—"}
-                        pattern = r"(Strengths|Weaknesses|Opportunities|Threats):\s*(.*?)(?=(\n\S|$))"
-                        matches = re.findall(pattern, swot_text, re.DOTALL)
+                    # Try parsing using explicit headers (preferred)
+                    pattern = r"(Strengths|Weaknesses|Opportunities|Threats)[:\s]*([\s\S]*?)(?=(\n\S|$))"
+                    matches = re.findall(pattern, swot_text, re.IGNORECASE)
 
+                    if matches:
                         for match in matches:
-                            key, content = match[0], match[1].strip()
+                            key, content = match[0].capitalize(), match[1].strip()
                             if content:
                                 sections[key] = content
-
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.markdown("**Strengths**")
-                            st.markdown(sections["Strengths"])
-                        with col2:
-                            st.markdown("**Weaknesses**")
-                            st.markdown(sections["Weaknesses"])
-
-                        col3, col4 = st.columns(2)
-                        with col3:
-                            st.markdown("**Opportunities**")
-                            st.markdown(sections["Opportunities"])
-                        with col4:
-                            st.markdown("**Threats**")
-                            st.markdown(sections["Threats"])
-
                     else:
-                        # If no clear headings, just display as-is
-                        st.markdown(swot_text)
+                        # Fallback: split by double newlines or numbered bullets
+                        chunks = re.split(r"\n{2,}|\n\d+\.\s", swot_text.strip())
+                        chunks = [c.strip() for c in chunks if c.strip()]
+
+                        # Map in order
+                        keys = list(sections.keys())
+                        for i, c in enumerate(chunks[:4]):
+                            sections[keys[i]] = c
+
+                    # Display in 2x2 grid
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown("**Strengths**")
+                        st.markdown(sections["Strengths"])
+                    with col2:
+                        st.markdown("**Weaknesses**")
+                        st.markdown(sections["Weaknesses"])
+
+                    col3, col4 = st.columns(2)
+                    with col3:
+                        st.markdown("**Opportunities**")
+                        st.markdown(sections["Opportunities"])
+                    with col4:
+                        st.markdown("**Threats**")
+                        st.markdown(sections["Threats"])
 
                     st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
-
 
 
                 if row.get('news_impacts'):
