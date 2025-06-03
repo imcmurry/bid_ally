@@ -156,10 +156,50 @@ if mode == "Overview":
                     st.write(row['insights'])
                     st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
+
                 if row.get("swot"):
+                    # 1) Heading
                     st.markdown('<div class="big-section-title">SWOT</div>', unsafe_allow_html=True)
-                    st.write(row['swot'])
+
+                    # 2) Pull out the raw text
+                    swot_text = row["swot"]
+
+                    # 3) Initialize defaults
+                    sections = {
+                        "Strengths": "—",
+                        "Weaknesses": "—",
+                        "Opportunities": "—",
+                        "Threats": "—"
+                    }
+
+                    # 4) Regex capture
+                    pattern = r"(?ms)^(Strengths|Weaknesses|Opportunities|Threats):\s*(.*?)(?=^(?:Strengths|Weaknesses|Opportunities|Threats):|\Z)"
+                    for match in re.findall(pattern, swot_text, flags=re.MULTILINE):
+                        heading = match[0]
+                        content = match[1].strip()
+                        if content:
+                            sections[heading] = content
+
+                    # 5) Render as a 2×2 grid
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown("**Strengths**")
+                        st.markdown(sections["Strengths"])
+                    with col2:
+                        st.markdown("**Weaknesses**")
+                        st.markdown(sections["Weaknesses"])
+
+                    col3, col4 = st.columns(2)
+                    with col3:
+                        st.markdown("**Opportunities**")
+                        st.markdown(sections["Opportunities"])
+                    with col4:
+                        st.markdown("**Threats**")
+                        st.markdown(sections["Threats"])
+
+                    # 6) Add a divider
                     st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+
 
 
 
