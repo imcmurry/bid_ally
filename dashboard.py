@@ -156,58 +156,9 @@ if mode == "Overview":
                     st.write(row['insights'])
                     st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
-                if row.get('swot'):
+                if row.get("swot"):
                     st.markdown('<div class="big-section-title">SWOT</div>', unsafe_allow_html=True)
-
-                    swot_text = row['swot']
-
-                    # 1) Initialize each quadrant with a fallback placeholder
-                    sections = {
-                        "Strengths": "—",
-                        "Weaknesses": "—",
-                        "Opportunities": "—",
-                        "Threats": "—"
-                    }
-
-                    # 2) Use a multiline‐Regex that grabs EVERYTHING between each header and the next header (or end of string).
-                    #    Flags: (?ms) → DOTALL (so '.' matches newlines) and MULTILINE (so '^' and '$' match line boundaries).
-                    pattern = r"(?ms)^(Strengths|Weaknesses|Opportunities|Threats):\s*(.*?)(?=^(?:Strengths|Weaknesses|Opportunities|Threats):|\Z)"
-                    matches = re.findall(pattern, swot_text, flags=re.MULTILINE)
-
-                    if matches:
-                        # Fill in each section’s content exactly as captured by the regex
-                        for key, content in matches:
-                            # key is one of "Strengths", "Weaknesses", etc.
-                            text_body = content.strip()
-                            if text_body:
-                                sections[key] = text_body
-                    else:
-                        # 3) Fallback: If no explicit headers found, split into up to 4 chunks by double‐newline
-                        #    or by numbered bullets (e.g. "1. ...").
-                        raw_chunks = re.split(r"\n{2,}|\n\d+\.\s", swot_text.strip())
-                        raw_chunks = [c.strip() for c in raw_chunks if c.strip()]
-
-                        # Assign in order: first chunk → Strengths, second → Weaknesses, etc.
-                        for i, chunk in enumerate(raw_chunks[:4]):
-                            sections[list(sections.keys())[i]] = chunk
-
-                    # 4) Render the 2×2 grid unconditionally (each quadrant now has either real text or "—")
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.markdown("**Strengths**")
-                        st.markdown(sections["Strengths"])
-                    with col2:
-                        st.markdown("**Weaknesses**")
-                        st.markdown(sections["Weaknesses"])
-
-                    col3, col4 = st.columns(2)
-                    with col3:
-                        st.markdown("**Opportunities**")
-                        st.markdown(sections["Opportunities"])
-                    with col4:
-                        st.markdown("**Threats**")
-                        st.markdown(sections["Threats"])
-
+                    st.write(row['swot'])
                     st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
 
