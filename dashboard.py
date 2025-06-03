@@ -14,22 +14,16 @@ DATA_PATH = ROOT / "combined_results_fixed1.json"
 
 @st.cache_data(show_spinner=False)
 def load_data(path: Path) -> pd.DataFrame:
-    """
-    Load the combined_results JSON into a DataFrame, normalize nested lists,
-    and strip whitespace from status.
-    """
     with path.open(encoding="utf-8") as f:
         raw = json.load(f)
 
     df = pd.json_normalize(raw)
 
-    # Flatten lists of length 1 in 'title'
     if 'title' in df.columns:
         df['title'] = df['title'].apply(
             lambda x: x[0] if isinstance(x, (list, tuple)) else x
         )
 
-    # Strip whitespace in 'status'
     if 'status' in df.columns:
         df['status'] = df['status'].str.strip()
 
@@ -40,6 +34,27 @@ if not DATA_PATH.exists():
     st.stop()
 
 df = load_data(DATA_PATH)
+
+# ────────────────────────────────────────────────────────────────────────────
+# CSS STYLING
+# ────────────────────────────────────────────────────────────────────────────
+
+st.markdown("""
+<style>
+.big-section-title {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-top: 1.2em;
+    margin-bottom: 0.5em;
+}
+.section-divider {
+    border-top: 1px solid #ddd;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ────────────────────────────────────────────────────────────────────────────
 # SIDEBAR MODE SELECTION
@@ -58,7 +73,6 @@ mode = st.sidebar.radio(
 if mode == "Overview":
     st.title("Bid Ally – Opportunity Overview")
 
-    # Sidebar filters
     st.sidebar.header("Filters")
     all_sources = sorted(df['source'].dropna().unique())
     selected_sources = st.sidebar.multiselect("Source", all_sources, default=all_sources)
@@ -68,7 +82,6 @@ if mode == "Overview":
 
     only_with_insights = st.sidebar.checkbox("Only show rows with insights")
 
-    # Apply filters
     filtered = df[
         df['source'].isin(selected_sources) &
         df['status'].isin(selected_statuses)
@@ -79,7 +92,6 @@ if mode == "Overview":
             filtered['insights'].astype(str).str.strip().ne("")
         ]
 
-    # Fuzzy search input
     search_query = st.text_input(
         "🔍 Search",
         "",
@@ -92,7 +104,6 @@ if mode == "Overview":
                 str(row.get("title", "")),
                 str(row.get("insights", "")),
                 str(row.get("swot", "")),
-                str(row.get("tags", "")),
                 ' '.join(
                     [str(b) for art in row.get("news_impacts", []) for b in art.get("impact", [])]
                 ) if row.get("news_impacts") else ""
@@ -102,7 +113,6 @@ if mode == "Overview":
 
         filtered = filtered[filtered.apply(lambda r: fuzzy_row_match(r), axis=1)]
 
-    # KPI row
     col1, col2, col3 = st.columns(3)
     col1.metric("Total Opportunities", int(filtered.shape[0]))
 
@@ -114,8 +124,7 @@ if mode == "Overview":
     col2.metric("Open / Forthcoming", int(open_mask.sum()))
 
     with_insights_mask = (
-        filtered['insights'].notna() &
-        filtered['insights'].astype(str).str.len().gt(0)
+        filtered['insights'].notna() & filtered['insights'].astype(str).str.len().gt(0)
     )
     col3.metric("With Insights", int(with_insights_mask.sum()))
 
@@ -130,38 +139,29 @@ if mode == "Overview":
                 f"{row['title']}  :small_blue_diamond: **{row['status']}**  |  **{row['source']}**"
             )
             with st.expander(header, expanded=False):
-                # Link
                 st.write(f"**Link:** [{row['link']}]({row['link']})")
 
-                # NAICS (if present)
                 if row.get('naics'):
                     try:
                         st.write(f"**NAICS:** {row['naics'][0]}")
                     except Exception:
                         st.write(f"**NAICS:** {row['naics']}")
 
-                # Contract value (if present)
                 if row.get('value'):
                     st.write(f"**Contract value:** {row['value']}")
 
-                # Tags
-                if row.get('tags'):
-                    tags = ', '.join([t.strip() for t in row['tags'].split(';') if t.strip()])
-                    st.write(f"**Tags:** {tags}")
-
-                # Insights
                 if row.get('insights'):
-                    st.markdown("#### Insights")
+                    st.markdown('<div class="big-section-title">Insights</div>', unsafe_allow_html=True)
                     st.write(row['insights'])
+                    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
-                # SWOT
                 if row.get('swot'):
-                    st.markdown("#### SWOT")
+                    st.markdown('<div class="big-section-title">SWOT</div>', unsafe_allow_html=True)
                     st.write(row['swot'])
+                    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
-                # Related News
                 if row.get('news_impacts'):
-                    st.markdown("#### Related News")
+                    st.markdown('<div class="big-section-title">Related News</div>', unsafe_allow_html=True)
                     for art in row['news_impacts']:
                         art_title = art.get("article_title", art.get("title", "Untitled article"))
                         art_link = art.get("article_link", art.get("link", ""))
@@ -171,23 +171,23 @@ if mode == "Overview":
                         else:
                             st.markdown(f"- **{art_title}**")
                         st.markdown(f"    • {impact_text}")
+                    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
-                # Fallback labels if no insights or no news
                 if not row.get('insights'):
-                    st.markdown("#### Insights")
+                    st.markdown('<div class="big-section-title">Insights</div>', unsafe_allow_html=True)
                     st.markdown("**No Insights available**")
+                    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
                 if not row.get("news_impacts"):
-                    st.markdown("#### Related News")
+                    st.markdown('<div class="big-section-title">Related News</div>', unsafe_allow_html=True)
                     st.markdown("**No Impact from Recent Events**")
+                    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
-    # Make each expander header slightly bolder
     st.markdown("""
         <style>
             .stExpander > div:first-child { font-weight: 600; }
         </style>
     """, unsafe_allow_html=True)
-
 
 # ────────────────────────────────────────────────────────────────────────────
 # SINGLE SOLICITATION MODE
@@ -206,7 +206,6 @@ elif mode == "Single Solicitation":
                 st.error(f"❌ Error: {e}")
                 st.stop()
 
-        # Basic Info
         st.markdown("#### Basic Info")
         st.write(f"**Title:** {row.get('title','')}")
         st.write(f"**Status:** {row.get('status','')}")
@@ -220,32 +219,19 @@ elif mode == "Single Solicitation":
 
         st.write(f"**Link:** [{single_url.strip()}]({single_url.strip()})")
 
-        # Tags
-        tags = row.get("tags", [])
-        if isinstance(tags, list) and tags:
-            st.markdown("#### Tags")
-            st.write(", ".join(tags))
+        if row.get("insights"):
+            st.markdown('<div class="big-section-title">Insights</div>', unsafe_allow_html=True)
+            st.write(row['insights'])
+            st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
-        # Insights
-        insights = row.get("insights", "")
-        st.markdown("#### Insights")
-        if insights:
-            st.write(insights)
-        else:
-            st.markdown("> **No insights generated.**")
+        if row.get("swot"):
+            st.markdown('<div class="big-section-title">SWOT</div>', unsafe_allow_html=True)
+            st.write(row['swot'])
+            st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
-        # SWOT
-        swot = row.get("swot", "")
-        st.markdown("#### SWOT")
-        if swot:
-            st.write(swot)
-        else:
-            st.markdown("> **No SWOT generated.**")
-
-        # Related News Impacts
         news_impacts = row.get("news_impacts", [])
-        st.markdown("#### Related News Impacts")
         if isinstance(news_impacts, list) and news_impacts:
+            st.markdown('<div class="big-section-title">Related News Impacts</div>', unsafe_allow_html=True)
             for art in news_impacts:
                 art_title = art.get("article_title", "Untitled")
                 art_link = art.get("article_link", "")
@@ -255,10 +241,12 @@ elif mode == "Single Solicitation":
                 else:
                     st.markdown(f"- **{art_title}**")
                 st.markdown(f"    • {impact_txt}")
+            st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
         else:
-            st.markdown("> **No relevant news impacts found.**")
+            st.markdown('<div class="big-section-title">Related News Impacts</div>', unsafe_allow_html=True)
+            st.markdown("**No relevant news impacts found.**")
+            st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
         st.markdown("---")
-
     else:
         st.info("Enter a valid SAM.gov or EU Tenders URL, then click **Generate Insights**.")
