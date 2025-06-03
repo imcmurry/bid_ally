@@ -158,13 +158,11 @@ if mode == "Overview":
 
 
                 if row.get("swot"):
-                    # 1) Heading
                     st.markdown('<div class="big-section-title">SWOT</div>', unsafe_allow_html=True)
 
-                    # 2) Pull out the raw text
-                    swot_text = row["swot"]
+                    raw = row["swot"]
 
-                    # 3) Initialize defaults
+                    # Default placeholders
                     sections = {
                         "Strengths": "—",
                         "Weaknesses": "—",
@@ -172,15 +170,51 @@ if mode == "Overview":
                         "Threats": "—"
                     }
 
-                    # 4) Regex capture
-                    pattern = r"(?ms)^(Strengths|Weaknesses|Opportunities|Threats):\s*(.*?)(?=^(?:Strengths|Weaknesses|Opportunities|Threats):|\Z)"
-                    for match in re.findall(pattern, swot_text, flags=re.MULTILINE):
-                        heading = match[0]
-                        content = match[1].strip()
-                        if content:
-                            sections[heading] = content
+                    # ------------------------------------------------------------------
+                    # 1) LINE-BY-LINE SCAN (robust to leading spaces, Markdown **, etc.)
+                    # ------------------------------------------------------------------
+                    current = None
+                    buff = {"Strengths": [], "Weaknesses": [], "Opportunities": [], "Threats": []}
 
-                    # 5) Render as a 2×2 grid
+                    for line in raw.splitlines():
+                        stripped = line.strip()
+
+                        # Strip leading markdown bullets / hashes / bold indicators
+                        # e.g. "**Strengths**", "### Strengths", "- Strengths", etc.
+                        heading_match = re.match(
+                            r"^(?:[#\-\*\s>]*\**\s*)?"
+                            r"(strengths|weaknesses|opportunities|threats)\b[:\-–]?\s*$",
+                            stripped,
+                            flags=re.I,
+                        )
+
+                        if heading_match:
+                            current = heading_match.group(1).capitalize()  # Strengths, etc.
+                            continue
+
+                        # Accumulate text under the current heading
+                        if current:
+                            buff[current].append(line)
+
+                    # Transfer buffers → sections dict
+                    for k in buff:
+                        joined = "\n".join(buff[k]).strip()
+                        if joined:
+                            sections[k] = joined
+
+                    # ------------------------------------------------------------------
+                    # 2) FALLBACK – if no headings matched at all, split into chunks
+                    # ------------------------------------------------------------------
+                    if all(v == "—" for v in sections.values()):
+                        chunks = re.split(r"\n{2,}|\n\d+\.\s", raw.strip())
+                        chunks = [c.strip() for c in chunks if c.strip()]
+                        keys = list(sections.keys())
+                        for i, chunk in enumerate(chunks[:4]):
+                            sections[keys[i]] = chunk
+
+                    # ------------------------------------------------------------------
+                    # 3) Render 2×2 grid
+                    # ------------------------------------------------------------------
                     col1, col2 = st.columns(2)
                     with col1:
                         st.markdown("**Strengths**")
@@ -197,8 +231,8 @@ if mode == "Overview":
                         st.markdown("**Threats**")
                         st.markdown(sections["Threats"])
 
-                    # 6) Add a divider
                     st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+
 
 
 
