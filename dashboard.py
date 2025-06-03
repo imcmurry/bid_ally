@@ -4,6 +4,7 @@ import streamlit as st
 from pathlib import Path
 from rapidfuzz import fuzz
 from single_solicitation import process_single_url
+import re
 
 # ────────────────────────────────────────────────────────────────────────────
 # CONFIG / DATA LOADING
@@ -159,32 +160,40 @@ if mode == "Overview":
                     st.markdown('<div class="big-section-title">SWOT</div>', unsafe_allow_html=True)
 
                     swot_text = row['swot']
-                    # Split SWOT into sections
-                    sections = {"Strengths": "", "Weaknesses": "", "Opportunities": "", "Threats": ""}
-                    for key in sections:
-                        if f"{key}:" in swot_text:
-                            part = swot_text.split(f"{key}:")[1]
-                            next_keys = [k for k in sections.keys() if k != key]
-                            end_idx = min([part.find(f"{k}:") for k in next_keys if part.find(f"{k}:") != -1] + [len(part)])
-                            sections[key] = part[:end_idx].strip()
 
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.markdown("**Strengths**")
-                        st.write(sections["Strengths"] or "—")
-                    with col2:
-                        st.markdown("**Weaknesses**")
-                        st.write(sections["Weaknesses"] or "—")
+                    # Check if text contains clear SWOT headings
+                    if all(kw in swot_text for kw in ["Strengths:", "Weaknesses:", "Opportunities:", "Threats:"]):
+                        sections = {"Strengths": "—", "Weaknesses": "—", "Opportunities": "—", "Threats": "—"}
+                        pattern = r"(Strengths|Weaknesses|Opportunities|Threats):\s*(.*?)(?=(\n\S|$))"
+                        matches = re.findall(pattern, swot_text, re.DOTALL)
 
-                    col3, col4 = st.columns(2)
-                    with col3:
-                        st.markdown("**Opportunities**")
-                        st.write(sections["Opportunities"] or "—")
-                    with col4:
-                        st.markdown("**Threats**")
-                        st.write(sections["Threats"] or "—")
+                        for match in matches:
+                            key, content = match[0], match[1].strip()
+                            if content:
+                                sections[key] = content
+
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.markdown("**Strengths**")
+                            st.markdown(sections["Strengths"])
+                        with col2:
+                            st.markdown("**Weaknesses**")
+                            st.markdown(sections["Weaknesses"])
+
+                        col3, col4 = st.columns(2)
+                        with col3:
+                            st.markdown("**Opportunities**")
+                            st.markdown(sections["Opportunities"])
+                        with col4:
+                            st.markdown("**Threats**")
+                            st.markdown(sections["Threats"])
+
+                    else:
+                        # If no clear headings, just display as-is
+                        st.markdown(swot_text)
 
                     st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+
 
 
                 if row.get('news_impacts'):
