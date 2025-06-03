@@ -157,35 +157,8 @@ if mode == "Overview":
 
                 if row.get('swot'):
                     st.markdown('<div class="big-section-title">SWOT</div>', unsafe_allow_html=True)
-
-                    swot_text = row['swot']
-                    # Split SWOT into sections
-                    sections = {"Strengths": "", "Weaknesses": "", "Opportunities": "", "Threats": ""}
-                    for key in sections:
-                        if f"{key}:" in swot_text:
-                            part = swot_text.split(f"{key}:")[1]
-                            next_keys = [k for k in sections.keys() if k != key]
-                            end_idx = min([part.find(f"{k}:") for k in next_keys if part.find(f"{k}:") != -1] + [len(part)])
-                            sections[key] = part[:end_idx].strip()
-
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.markdown("**Strengths**")
-                        st.write(sections["Strengths"] or "—")
-                    with col2:
-                        st.markdown("**Weaknesses**")
-                        st.write(sections["Weaknesses"] or "—")
-
-                    col3, col4 = st.columns(2)
-                    with col3:
-                        st.markdown("**Opportunities**")
-                        st.write(sections["Opportunities"] or "—")
-                    with col4:
-                        st.markdown("**Threats**")
-                        st.write(sections["Threats"] or "—")
-
+                    st.write(row['swot'])
                     st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
-
 
                 if row.get('news_impacts'):
                     st.markdown('<div class="big-section-title">Related News</div>', unsafe_allow_html=True)
@@ -253,34 +226,8 @@ elif mode == "Single Solicitation":
 
         if row.get("swot"):
             st.markdown('<div class="big-section-title">SWOT</div>', unsafe_allow_html=True)
-
-            swot_text = row['swot']
-            sections = {"Strengths": "", "Weaknesses": "", "Opportunities": "", "Threats": ""}
-            for key in sections:
-                if f"{key}:" in swot_text:
-                    part = swot_text.split(f"{key}:")[1]
-                    next_keys = [k for k in sections.keys() if k != key]
-                    end_idx = min([part.find(f"{k}:") for k in next_keys if part.find(f"{k}:") != -1] + [len(part)])
-                    sections[key] = part[:end_idx].strip()
-
-            col1, col2 = st.columns(2)
-            with col1:
-                st.markdown("**Strengths**")
-                st.write(sections["Strengths"] or "—")
-            with col2:
-                st.markdown("**Weaknesses**")
-                st.write(sections["Weaknesses"] or "—")
-
-            col3, col4 = st.columns(2)
-            with col3:
-                st.markdown("**Opportunities**")
-                st.write(sections["Opportunities"] or "—")
-            with col4:
-                st.markdown("**Threats**")
-                st.write(sections["Threats"] or "—")
-
+            st.write(row['swot'])
             st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
-
 
         news_impacts = row.get("news_impacts", [])
         if isinstance(news_impacts, list) and news_impacts:
