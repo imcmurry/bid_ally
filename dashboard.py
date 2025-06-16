@@ -82,10 +82,26 @@ if mode == "Overview":
     selected_statuses = st.sidebar.multiselect("Status", all_statuses, default=all_statuses)
 
     only_with_insights = st.sidebar.checkbox("Only show rows with insights")
+    
+    # Ensure value is numeric (with fallback)
+    df["value_num"] = pd.to_numeric(df.get("value", None), errors="coerce")
+
+    min_val, max_val = df["value_num"].min(), df["value_num"].max()
+    if pd.notna(min_val) and pd.notna(max_val):
+        valuation_range = st.sidebar.slider(
+            "Filter by Estimated Contract Value ($)",
+            min_value=float(min_val),
+            max_value=float(max_val),
+            value=(float(min_val), float(max_val)),
+            step=1000.0
+        )
+        df = df[df["value_num"].between(valuation_range[0], valuation_range[1])]
+
 
     filtered = df[
         df['source'].isin(selected_sources) &
-        df['status'].isin(selected_statuses)
+        df['status'].isin(selected_statuses) &
+        df["value_num"].between(valuation_range[0], valuation_range[1])
     ]
     if only_with_insights:
         filtered = filtered[
