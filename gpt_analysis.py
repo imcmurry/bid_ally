@@ -36,7 +36,7 @@ def generate_insights(content: str,
 
         prompt = f"""
         Given the following bid information extracted from government procurement documents, provide:
-        1. A summary of the bid.
+        1. A concise top level summary of the bid.
         2. A timeline to accomplish the requirements.
         3. An estimated valuation of the contract.
         4. An action plan with estimated man‑hours.
@@ -220,7 +220,7 @@ def generate_news_impact_paragraph(insights: str,
     Description: {article.get('description', '')}
     Content: {article.get('content', '')}
 
-    Please provide a brief paragraph on how the event/news in this article could positively or negatively
+    Please provide a 3-4 brief and concise bullet points on how the event/news in this article could positively or negatively
     affect the company's performance if they secure this bid.
     """
 
