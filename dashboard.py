@@ -103,6 +103,7 @@ if mode == "Overview":
         df['status'].isin(selected_statuses) &
         df["value_num"].between(valuation_range[0], valuation_range[1])
     ]
+    
     if only_with_insights:
         filtered = filtered[
             filtered['insights'].notna() &
