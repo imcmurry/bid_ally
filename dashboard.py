@@ -50,7 +50,7 @@ st.markdown("""
     margin-bottom: 0.5em;
 }
 .section-divider {
-    border-top: 1px solid #ddd;
+    border-top: 2px solid #ddd;
     margin-top: 1em;
     margin-bottom: 1em;
 }
