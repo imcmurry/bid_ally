@@ -86,7 +86,6 @@ if mode == "Overview":
     # Ensure value is numeric (with fallback)
     df["value_num"] = pd.to_numeric(df.get("value", None), errors="coerce")
 
-    valuation_range = None
     min_val, max_val = df["value_num"].min(), df["value_num"].max()
     if pd.notna(min_val) and pd.notna(max_val):
         valuation_range = st.sidebar.slider(
@@ -96,14 +95,14 @@ if mode == "Overview":
             value=(float(min_val), float(max_val)),
             step=1000.0
         )
+        df = df[df["value_num"].between(valuation_range[0], valuation_range[1])]
 
-    # Now safely filter
+
     filtered = df[
         df['source'].isin(selected_sources) &
-        df['status'].isin(selected_statuses)
+        df['status'].isin(selected_statuses) &
+        df["value_num"].between(valuation_range[0], valuation_range[1])
     ]
-    if valuation_range:
-        filtered = filtered[filtered["value_num"].between(valuation_range[0], valuation_range[1])]
     
     if only_with_insights:
         filtered = filtered[
@@ -168,8 +167,6 @@ if mode == "Overview":
 
                 if row.get('value'):
                     st.write(f"**Contract value:** {row['value']}")
-                    if row.get("value_confidence"):
-                        st.write(f"**Confidence:** {row['value_confidence']}")
 
                 if row.get('insights'):
                     st.markdown('<div class="big-section-title">Insights</div>', unsafe_allow_html=True)
@@ -281,6 +278,18 @@ if mode == "Overview":
                     st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
     st.markdown("""
+<style>
+    .stExpander {
+        border: 1px solid #ccc !important;
+        border-radius: 8px !important;
+        margin-bottom: 20px !important;
+        padding: 5px !important;
+    }
+    .stExpander > div:first-child {
+        font-weight: 600;
+    }
+</style>
+
         <style>
             .stExpander > div:first-child { font-weight: 600; }
         </style>
