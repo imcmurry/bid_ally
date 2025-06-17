@@ -86,6 +86,7 @@ if mode == "Overview":
     # Ensure value is numeric (with fallback)
     df["value_num"] = pd.to_numeric(df.get("value", None), errors="coerce")
 
+    valuation_range = None
     min_val, max_val = df["value_num"].min(), df["value_num"].max()
     if pd.notna(min_val) and pd.notna(max_val):
         valuation_range = st.sidebar.slider(
