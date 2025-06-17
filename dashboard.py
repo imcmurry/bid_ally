@@ -93,8 +93,11 @@ if mode == "Overview":
             min_value=float(min_val),
             max_value=float(max_val),
             value=(float(min_val), float(max_val)),
-            step=1000.0
+            step=1000.0,
+            format="%.0f"
         )
+
+        st.sidebar.write(f"Selected range: **${valuation_range[0]:,.0f} – ${valuation_range[1]:,.0f}**")
         df = df[df["value_num"].between(valuation_range[0], valuation_range[1])]
 
 
@@ -166,7 +169,29 @@ if mode == "Overview":
                         st.write(f"**NAICS:** {row['naics']}")
 
                 if row.get('value'):
-                    st.write(f"**Contract value:** {row['value']}")
+                    try:
+                        value_float = float(row['value'])
+                        st.write(f"**Contract value:** ${value_float:,.0f}")
+                    except Exception:
+                        st.write(f"**Contract value:** {row['value']}")
+
+                    if row.get("value_confidence"):
+                        confidence = str(row["value_confidence"]).lower()
+                        color_map = {"high": "green", "medium": "orange", "low": "red"}
+                        explain_map = {
+                            "high": "High confidence: clear numeric language in text.",
+                            "medium": "Medium confidence: some uncertainty or indirect estimate.",
+                            "low": "Low confidence: weak signal, vague language or absence of numeric context."
+                        }
+                        color = color_map.get(confidence, "gray")
+                        explanation = explain_map.get(confidence, "No explanation available.")
+
+                        st.markdown(
+                            f"<span style='color:{color}; font-weight:bold' title='{explanation}'>"
+                            f"Contract value estimation confidence: {row['value_confidence'].capitalize()}"
+                            f"</span>",
+                            unsafe_allow_html=True
+                        )
 
                 if row.get('insights'):
                     st.markdown('<div class="big-section-title">Insights</div>', unsafe_allow_html=True)
