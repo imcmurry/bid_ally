@@ -280,7 +280,7 @@ if mode == "Overview":
     st.markdown("""
 <style>
     .stExpander {
-        border: 1px solid #ccc !important;
+        border: 4px solid #ccc !important;
         border-radius: 8px !important;
         margin-bottom: 20px !important;
         padding: 5px !important;
