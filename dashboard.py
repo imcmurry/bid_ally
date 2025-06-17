@@ -96,14 +96,14 @@ if mode == "Overview":
             value=(float(min_val), float(max_val)),
             step=1000.0
         )
-        df = df[df["value_num"].between(valuation_range[0], valuation_range[1])]
 
-
+    # Now safely filter
     filtered = df[
         df['source'].isin(selected_sources) &
-        df['status'].isin(selected_statuses) &
-        df["value_num"].between(valuation_range[0], valuation_range[1])
+        df['status'].isin(selected_statuses)
     ]
+    if valuation_range:
+        filtered = filtered[filtered["value_num"].between(valuation_range[0], valuation_range[1])]
     
     if only_with_insights:
         filtered = filtered[
@@ -168,6 +168,8 @@ if mode == "Overview":
 
                 if row.get('value'):
                     st.write(f"**Contract value:** {row['value']}")
+                    if row.get("value_confidence"):
+                        st.write(f"**Confidence:** {row['value_confidence']}")
 
                 if row.get('insights'):
                     st.markdown('<div class="big-section-title">Insights</div>', unsafe_allow_html=True)
