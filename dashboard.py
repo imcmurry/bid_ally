@@ -88,6 +88,7 @@ if mode == "Overview":
 
     min_val, max_val = df["value_num"].min(), df["value_num"].max()
     if pd.notna(min_val) and pd.notna(max_val):
+        st.sidebar.markdown("<div style='margin-top: 25px'></div>", unsafe_allow_html=True)
         valuation_range = st.sidebar.slider(
             "Filter by Estimated Contract Value ($)",
             min_value=float(min_val),
@@ -97,7 +98,7 @@ if mode == "Overview":
             format="%.0f"
         )
 
-        st.sidebar.write(f"Selected range: **${valuation_range[0]:,.0f} – ${valuation_range[1]:,.0f}**")
+        #st.sidebar.write(f"Selected range: **${valuation_range[0]:,.0f} – ${valuation_range[1]:,.0f}**")
         df = df[df["value_num"].between(valuation_range[0], valuation_range[1])]
 
 
@@ -187,9 +188,9 @@ if mode == "Overview":
                         explanation = explain_map.get(confidence, "No explanation available.")
 
                         st.markdown(
+                            f"Contract value estimation confidence: "
                             f"<span style='color:{color}; font-weight:bold' title='{explanation}'>"
-                            f"Contract value estimation confidence: {row['value_confidence'].capitalize()}"
-                            f"</span>",
+                            f"{row['value_confidence'].capitalize()}</span>",
                             unsafe_allow_html=True
                         )
 
