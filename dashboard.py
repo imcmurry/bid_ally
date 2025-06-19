@@ -87,10 +87,15 @@ if mode == "Overview":
     df["value_num"] = pd.to_numeric(df.get("value", None), errors="coerce")
 
     min_val, max_val = df["value_num"].min(), df["value_num"].max()
+    valuation_range = None
+
     if pd.notna(min_val) and pd.notna(max_val):
+        # Add spacing above the slider
         st.sidebar.markdown("<div style='margin-top: 25px'></div>", unsafe_allow_html=True)
+
+        # Display slider (without commas)
         valuation_range = st.sidebar.slider(
-            "Filter by Estimated Contract Value ($)",
+            "Filter by Estimated Contract Value",
             min_value=float(min_val),
             max_value=float(max_val),
             value=(float(min_val), float(max_val)),
@@ -98,7 +103,15 @@ if mode == "Overview":
             format="%.0f"
         )
 
-        #st.sidebar.write(f"Selected range: **${valuation_range[0]:,.0f} – ${valuation_range[1]:,.0f}**")
+        # Display formatted range above the slider
+        st.sidebar.markdown(
+            f"<span style='font-weight:500;'>Selected Range: "
+            f"<span style='color:#2c3e50;'>${valuation_range[0]:,.0f}</span> – "
+            f"<span style='color:#2c3e50;'>${valuation_range[1]:,.0f}</span></span>",
+            unsafe_allow_html=True
+        )
+
+        # Apply filter
         df = df[df["value_num"].between(valuation_range[0], valuation_range[1])]
 
 
