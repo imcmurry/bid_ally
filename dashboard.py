@@ -172,9 +172,11 @@ if mode == "Overview":
         st.info("No opportunities match the current filters.")
     else:
         for _, row in filtered.iterrows():
+            clean_title = row['title'].replace("$", "&#36;")
             header = (
-                f"{row['title']}  :small_blue_diamond: **{row['status']}**  |  **{row['source']}**"
+                f"{clean_title}  :small_blue_diamond: **{row['status']}**  |  **{row['source']}**"
             )
+
             with st.expander(header, expanded=False):
                 st.write(f"**Link:** [{row['link']}]({row['link']})")
 
