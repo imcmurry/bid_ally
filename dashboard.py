@@ -104,12 +104,8 @@ if mode == "Overview":
         )
 
         # Display formatted range above the slider
-        st.sidebar.markdown(
-            f"<span style='font-weight:500;'>Selected Range: "
-            f"<span style='color:#2c3e50;'>${valuation_range[0]:,.0f}</span> – "
-            f"<span style='color:#2c3e50;'>${valuation_range[1]:,.0f}</span></span>",
-            unsafe_allow_html=True
-        )
+        st.sidebar.markdown(f"<span style='font-weight:500;'>Selected Range: <span style='color:#2c3e50;'>${valuation_range[0]:,.0f}</span> – <span style='color:#2c3e50;'>${valuation_range[1]:,.0f}</span></span>", unsafe_allow_html=True)
+
 
         # Apply filter
         df = df[df["value_num"].between(valuation_range[0], valuation_range[1])]
