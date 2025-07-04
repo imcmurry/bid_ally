@@ -26,7 +26,7 @@ def render_overview():
         return
 
     df = load_data(DATA_PATH)
-    st.title("Bid Ally – Opportunity Overview")
+    st.title("Bid Ally test – Opportunity Overview")
 
     st.sidebar.header("Filters")
     all_sources = sorted(df['source'].dropna().unique())
