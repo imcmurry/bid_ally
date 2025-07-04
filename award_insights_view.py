@@ -45,6 +45,7 @@ def render_award_insights():
     ax.set_xlabel("Year")
     ax.set_ylabel("Total Award Value (Million $)")
     ax.set_xticklabels(yearly_df["year"], rotation=45)
+    ax.ticklabel_format(style='plain', axis='y')
 
     st.pyplot(fig)
 
