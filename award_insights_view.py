@@ -26,25 +26,25 @@ def render_award_insights():
 
     fig, ax = plt.subplots()
 
-    # Ensure year is numeric and sorted
-    yearly_df["year"] = pd.to_numeric(yearly_df["year"], errors="coerce")
-    yearly_df = yearly_df.dropna(subset=["year"])
+    # Ensure year is treated as a categorical string
+    yearly_df["year"] = yearly_df["year"].astype(int).astype(str)
     yearly_df = yearly_df.sort_values("year")
 
-    # Plot bar chart
+    # Bar plot using categorical years
     sns.barplot(x="year", y="total_awarded", data=yearly_df, color="skyblue", ax=ax)
 
-    # Add smoothed 3-year moving average line
+    # Add smoothed moving average line (numeric x-values for the line)
+    yearly_df["year_int"] = yearly_df["year"].astype(int)
     yearly_df["smoothed"] = yearly_df["total_awarded"].rolling(window=3, min_periods=1).mean()
     ax.plot(yearly_df["year"], yearly_df["smoothed"], color="red", linewidth=2)
 
-    # Fix axis
+    # Fix labels
     ax.set_xlabel("Year")
     ax.set_ylabel("Total Award Value ($)")
-    ax.set_xticks(yearly_df["year"])
-    ax.set_xticklabels([int(y) for y in yearly_df["year"]], rotation=45)
+    ax.set_xticklabels(yearly_df["year"], rotation=45)
 
     st.pyplot(fig)
+
 
 
     # Awards by State – Interactive U.S. map
