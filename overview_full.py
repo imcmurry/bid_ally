@@ -5,9 +5,8 @@ import streamlit as st
 from pathlib import Path
 from rapidfuzz import fuzz
 import re
+from config import DATA_PATH
 
-ROOT = Path(__file__).parent.parent
-DATA_PATH = ROOT / "combined_results_test1.json"
 
 @st.cache_data(show_spinner=False)
 def load_data(path: Path) -> pd.DataFrame:

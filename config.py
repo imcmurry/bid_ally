@@ -3,6 +3,7 @@
 from dotenv import load_dotenv
 import os
 import openai
+from pathlib import Path
 
 load_dotenv()
 
@@ -127,3 +128,6 @@ SAM_SEARCH_KEYWORDS = [
     "guam"
     
 ]
+
+ROOT = Path(__file__).parent
+DATA_PATH = ROOT / "combined_results_test1.json"
