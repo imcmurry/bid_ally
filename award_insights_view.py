@@ -40,7 +40,7 @@ def render_award_insights():
 
     # Fix labels
     ax.set_xlabel("Year")
-    ax.set_ylabel("Total Award Value ($)")
+    ax.set_ylabel("Total Award Value (Million $)")
     ax.set_xticklabels(yearly_df["year"], rotation=45)
 
     st.pyplot(fig)
