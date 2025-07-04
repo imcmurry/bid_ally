@@ -25,8 +25,18 @@ def render_award_insights():
     st.subheader("Total Contract Awards by Year")
 
     fig, ax = plt.subplots()
+    yearly_df = yearly_df.sort_values("year")
     sns.barplot(x="year", y="total_awarded", data=yearly_df, color="skyblue", ax=ax)
-    sns.lineplot(x="year", y="total_awarded", data=yearly_df.rolling(3, on="year").mean(), color="red", ax=ax)
+
+    # Add 3-period moving average (manually)
+    yearly_df["smoothed"] = yearly_df["total_awarded"].rolling(window=3).mean()
+    ax.plot(yearly_df["year"], yearly_df["smoothed"], color="red", linewidth=2)
+
+    ax.set_ylabel("Total Award Value ($)")
+    ax.set_xlabel("Year")
+    ax.set_xticks(yearly_df["year"])
+    ax.set_xticklabels(yearly_df["year"], rotation=45)
+
     ax.set_ylabel("Total Award Value ($)")
     st.pyplot(fig)
 
