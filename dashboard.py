@@ -5,6 +5,7 @@ import pandas as pd
 from pathlib import Path
 from overview_full import render_overview
 from single_solicitation_view import render_single_solicitation
+from award_insights_view import render_award_insights
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -62,7 +63,8 @@ st.markdown("""
 
 mode = st.sidebar.radio(
     "Mode",
-    ["Overview", "Single Solicitation"],
+    ["Overview", "Single Solicitation", "Award Insights"]
+,
     index=0
 )
 
@@ -75,3 +77,6 @@ if mode == "Overview":
 
 elif mode == "Single Solicitation":
     render_single_solicitation()
+
+elif mode == "Award Insights":
+    render_award_insights()

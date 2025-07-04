@@ -131,3 +131,5 @@ SAM_SEARCH_KEYWORDS = [
 
 ROOT = Path(__file__).parent
 DATA_PATH = ROOT / "combined_results_test1.json"
+
+DB_PATH = ROOT / "bid_ally.db"

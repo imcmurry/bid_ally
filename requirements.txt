@@ -13,3 +13,7 @@ webdriver-manager
 streamlit
 urllib3
 certifi
+plotly
+matplotlib
+seaborn
+python-dotenv
