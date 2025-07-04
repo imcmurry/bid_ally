@@ -29,6 +29,7 @@ def render_award_insights():
     # Ensure year is treated as a categorical string
     yearly_df["year"] = yearly_df["year"].astype(int).astype(str)
     yearly_df = yearly_df.sort_values("year")
+    yearly_df = yearly_df[yearly_df["year_int"] >= 2010]
 
     # Bar plot using categorical years
     sns.barplot(x="year", y="total_awarded", data=yearly_df, color="skyblue", ax=ax)
