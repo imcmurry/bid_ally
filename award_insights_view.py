@@ -26,24 +26,29 @@ def render_award_insights():
 
     fig, ax = plt.subplots()
 
-    # Ensure year is treated as a categorical string
-    yearly_df["year"] = yearly_df["year"].astype(int).astype(str)
+    # Clean and filter
+    yearly_df["year"] = pd.to_numeric(yearly_df["year"], errors="coerce").astype("Int64")
+    yearly_df = yearly_df.dropna(subset=["year"])
     yearly_df = yearly_df.sort_values("year")
+    yearly_df["year_int"] = yearly_df["year"]
+    yearly_df = yearly_df[yearly_df["year_int"] >= 2010]
 
-    # Bar plot using categorical years
-    sns.barplot(x="year", y="total_awarded", data=yearly_df, color="skyblue", ax=ax)
+    # Convert to millions
+    yearly_df["award_millions"] = yearly_df["total_awarded"] / 1e6
+    yearly_df["smoothed"] = yearly_df["award_millions"].rolling(window=3, min_periods=1).mean()
 
-    # Add smoothed moving average line (numeric x-values for the line)
-    yearly_df["year_int"] = yearly_df["year"].astype(int)
-    yearly_df["smoothed"] = yearly_df["total_awarded"].rolling(window=3, min_periods=1).mean()
+    # Plot
+    sns.barplot(x="year", y="award_millions", data=yearly_df, color="skyblue", ax=ax)
     ax.plot(yearly_df["year"], yearly_df["smoothed"], color="red", linewidth=2)
 
-    # Fix labels
+    # Fix labels and format
     ax.set_xlabel("Year")
-    ax.set_ylabel("Total Award Value ($)")
+    ax.set_ylabel("Total Award Value ($ Millions)")
     ax.set_xticklabels(yearly_df["year"], rotation=45)
+    ax.ticklabel_format(style='plain', axis='y')
 
     st.pyplot(fig)
+
 
 
 
