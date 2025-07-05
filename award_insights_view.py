@@ -48,7 +48,7 @@ def render_award_insights():
     # ───────────────────────────────
 
     yearly_df = load_sql_table("usaspending_yearly_totals")
-    st.subheader("Total Contract Awards by Year")
+    st.subheader("Total Award Value By Year")
 
     # Clean and filter
     yearly_df["year"] = yearly_df["year"].astype(int)
@@ -62,7 +62,7 @@ def render_award_insights():
         x="year",
         y="total_awarded",
         labels={"year": "Year", "total_awarded": "Total Award Value ($)"},
-        title="Total Contract Awards by Year",
+        title="Total Award Value By Year",
         color_discrete_sequence=["#1f77b4"],  # Matching blue
     )
 
