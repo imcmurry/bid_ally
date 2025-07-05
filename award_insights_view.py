@@ -17,8 +17,9 @@ def render_award_insights():
 
     # Top Recipients
     top_df = load_sql_table("usaspending_top_recipients")
-    top_df = top_df.sort_values(by="total_awarded", ascending=False).head(10)
+    top_df = top_df.sort_values("total_awarded", ascending=False)  # Sort descending
     st.subheader("Top Recipients by Total Award Value")
+    st.bar_chart(top_df.set_index("recipient_name")[:10])
 
     # Yearly Totals (Bar chart with smoothed line)
     yearly_df = load_sql_table("usaspending_yearly_totals")
@@ -31,7 +32,6 @@ def render_award_insights():
     yearly_df = yearly_df[yearly_df["year"] >= 2010]
     yearly_df["year"] = yearly_df["year"].astype(int).astype(str)
     yearly_df = yearly_df.sort_values("year")
-    
 
     # Bar plot using categorical years
     sns.barplot(x="year", y="total_awarded", data=yearly_df, color="skyblue", ax=ax)
@@ -48,8 +48,6 @@ def render_award_insights():
     ax.ticklabel_format(style='plain', axis='y')
 
     st.pyplot(fig)
-
-
 
     # Awards by State – Interactive U.S. map
     state_df = load_sql_table("usaspending_awards_by_state")
@@ -72,3 +70,4 @@ def render_award_insights():
     selected_state = st.selectbox("Select a state", sorted(state_yearly_df['state'].dropna().unique()))
     filtered = state_yearly_df[state_yearly_df['state'] == selected_state]
     st.line_chart(filtered.set_index("year")["total_awarded"])
+
