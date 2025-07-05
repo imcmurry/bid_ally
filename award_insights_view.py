@@ -34,7 +34,12 @@ def render_award_insights():
     fig_top.update_layout(
         yaxis={'categoryorder': 'total ascending'},
         xaxis_tickformat=",",
-        height=500
+        height=500,
+        xaxis=dict(
+            showgrid=True,
+            gridcolor="lightgray",     # Subtle grid color
+            gridwidth=1.2              # Slightly bolder than default (default is ~1.0)
+        )
     )
     st.plotly_chart(fig_top, use_container_width=True)
 
