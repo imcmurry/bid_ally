@@ -17,6 +17,7 @@ def render_award_insights():
 
     # Top Recipients
     top_df = load_sql_table("usaspending_top_recipients")
+    top_df = top_df.sort_values(by="total_awarded", ascending=False).head(10)
     st.subheader("Top Recipients by Total Award Value")
     st.bar_chart(top_df.set_index("recipient_name")[:10])
 
