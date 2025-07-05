@@ -61,7 +61,7 @@ def render_award_insights():
         yearly_df,
         x="year",
         y="total_awarded",
-        labels={"year": "Year", "total_awarded": "Total  Value ($)"},
+        labels={"year": "Year", "total_awarded": "Total Award Value ($)"},
         title="Total Contract Awards by Year",
         color_discrete_sequence=["#1f77b4"],  # Matching blue
     )
