@@ -106,12 +106,43 @@ def render_award_insights():
     st.plotly_chart(fig_map, use_container_width=True)
 
     # ───────────────────────────────
-    # State Trends (Year-over-Year)
+    # State Growth Trends Choropleth
     # ───────────────────────────────
     state_yearly_df = load_sql_table("usaspending_state_yearly_trends")
-    st.subheader("Year-over-Year Trends by State")
-    selected_state = st.selectbox("Select a state", sorted(state_yearly_df['state'].dropna().unique()))
-    filtered = state_yearly_df[state_yearly_df['state'] == selected_state]
-    st.line_chart(filtered.set_index("year")["total_awarded"])
+    st.subheader("Average Year-over-Year Growth by State")
+
+    # Preprocessing
+    state_yearly_df = state_yearly_df.sort_values(["state", "year"])
+    state_yearly_df["year"] = state_yearly_df["year"].astype(int)
+
+    # Calculate YoY percent change
+    state_yearly_df["pct_change"] = state_yearly_df.groupby("state")["total_awarded"].pct_change()
+
+    # Calculate average growth rate per state
+    growth_summary = (
+        state_yearly_df.groupby("state")["pct_change"]
+        .mean()
+        .reset_index()
+        .rename(columns={"pct_change": "avg_growth_rate"})
+    )
+
+    # Format as percentage
+    growth_summary["avg_growth_rate_percent"] = growth_summary["avg_growth_rate"] * 100
+
+    # Create choropleth
+    fig_growth = px.choropleth(
+        growth_summary,
+        locations="state",
+        locationmode="USA-states",
+        color="avg_growth_rate_percent",
+        color_continuous_scale=["red", "white", "green"],
+        range_color=(-25, 25),  # Clamp for better visual scale
+        scope="usa",
+        labels={"avg_growth_rate_percent": "Avg YoY Growth (%)"},
+        title="Average YoY Federal Contract Growth by State"
+    )
+
+    st.plotly_chart(fig_growth, use_container_width=True)
+
 
 
