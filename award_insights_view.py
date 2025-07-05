@@ -15,11 +15,25 @@ def load_sql_table(table_name: str) -> pd.DataFrame:
 def render_award_insights():
     st.title("USAspending Award Insights")
 
-    # Top Recipients
+    # Top Recipients (using Plotly for proper ordering)
     top_df = load_sql_table("usaspending_top_recipients")
-    top_df = top_df.sort_values("total_awarded", ascending=False)  # Sort descending
+    top_df = top_df.sort_values("total_awarded", ascending=False).head(10)
+
     st.subheader("Top Recipients by Total Award Value")
-    st.bar_chart(top_df.set_index("recipient_name")[:10])
+
+    fig_top = px.bar(
+        top_df,
+        x="recipient_name",
+        y="total_awarded",
+        xaxis_tickangle=-45,
+        yaxis_tickformat=',',
+        title="Top Recipients by Total Award Value",
+        labels={"recipient_name": "Recipient", "total_awarded": "Total Awarded ($)"},
+    )
+
+    fig_top.update_layout(xaxis_tickangle=-45)
+    st.plotly_chart(fig_top, use_container_width=True)
+
 
     # Yearly Totals (Bar chart with smoothed line)
     yearly_df = load_sql_table("usaspending_yearly_totals")
