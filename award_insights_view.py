@@ -135,14 +135,16 @@ def render_award_insights():
         locations="state",
         locationmode="USA-states",
         color="avg_growth_rate_percent",
-        color_continuous_scale=["red", "white", "green"],
-        range_color=(-25, 25),  # Clamp for better visual scale
+        color_continuous_scale=px.colors.diverging.RdYlGn[::-1],  # green→white→red
+        range_color=(-50, 100),  # Tighter, optimized gradient
         scope="usa",
         labels={"avg_growth_rate_percent": "Avg YoY Growth (%)"},
         title="Average YoY Federal Contract Growth by State"
     )
 
+
     st.plotly_chart(fig_growth, use_container_width=True)
+
 
 
 
