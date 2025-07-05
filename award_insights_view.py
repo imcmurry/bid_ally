@@ -16,22 +16,25 @@ def render_award_insights():
     st.title("USAspending Award Insights")
 
     # ────────────────
-    # Top Recipients
+    # Top Recipients – Horizontal Bar Chart
     # ────────────────
     top_df = load_sql_table("usaspending_top_recipients")
     top_df = top_df.sort_values("total_awarded", ascending=False).head(10)
 
     st.subheader("Top Recipients by Total Award Value")
+
     fig_top = px.bar(
         top_df,
-        x="recipient_name",
-        y="total_awarded",
+        x="total_awarded",
+        y="recipient_name",
+        orientation="h",
         labels={"recipient_name": "Recipient", "total_awarded": "Total Awarded ($)"},
         title="Top 10 Recipients by Federal Award Value"
     )
     fig_top.update_layout(
-        xaxis_tickangle=-45,
-        yaxis_tickformat=",",
+        yaxis={'categoryorder': 'total ascending'},
+        xaxis_tickformat=",",
+        height=500
     )
     st.plotly_chart(fig_top, use_container_width=True)
 
@@ -83,5 +86,3 @@ def render_award_insights():
     selected_state = st.selectbox("Select a state", sorted(state_yearly_df['state'].dropna().unique()))
     filtered = state_yearly_df[state_yearly_df['state'] == selected_state]
     st.line_chart(filtered.set_index("year")["total_awarded"])
-
-
