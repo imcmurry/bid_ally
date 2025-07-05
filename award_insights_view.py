@@ -25,8 +25,6 @@ def render_award_insights():
         top_df,
         x="recipient_name",
         y="total_awarded",
-        xaxis_tickangle=-45,
-        yaxis_tickformat=',',
         title="Top Recipients by Total Award Value",
         labels={"recipient_name": "Recipient", "total_awarded": "Total Awarded ($)"},
     )
