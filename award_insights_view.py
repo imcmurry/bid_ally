@@ -46,25 +46,47 @@ def render_award_insights():
     # ───────────────────────────────
     # Yearly Totals (Bar + Smoothing)
     # ───────────────────────────────
+
     yearly_df = load_sql_table("usaspending_yearly_totals")
     st.subheader("Total Contract Awards by Year")
 
-    fig, ax = plt.subplots()
+    # Clean and filter
     yearly_df["year"] = yearly_df["year"].astype(int)
     yearly_df = yearly_df[yearly_df["year"] >= 2010]
-    yearly_df["year"] = yearly_df["year"].astype(str)
     yearly_df = yearly_df.sort_values("year")
-
-    sns.barplot(x="year", y="total_awarded", data=yearly_df, color="skyblue", ax=ax)
-    yearly_df["year_int"] = yearly_df["year"].astype(int)
     yearly_df["smoothed"] = yearly_df["total_awarded"].rolling(window=3, min_periods=1).mean()
-    ax.plot(yearly_df["year"], yearly_df["smoothed"], color="red", linewidth=2)
 
-    ax.set_xlabel("Year")
-    ax.set_ylabel("Total Award Value ($)")
-    ax.set_xticklabels(yearly_df["year"], rotation=45)
-    ax.ticklabel_format(style='plain', axis='y')
-    st.pyplot(fig)
+    # Create Plotly bar + line chart
+    fig_year = px.bar(
+        yearly_df,
+        x="year",
+        y="total_awarded",
+        labels={"year": "Year", "total_awarded": "Total Award Value ($)"},
+        title="Total Contract Awards by Year",
+        color_discrete_sequence=["#1f77b4"],  # Matching blue
+    )
+
+    # Add smoothed line
+    fig_year.add_scatter(
+        x=yearly_df["year"],
+        y=yearly_df["smoothed"],
+        mode="lines",
+        name="3-Year Rolling Avg",
+        line=dict(color="red", width=2),
+    )
+
+    fig_year.update_layout(
+        xaxis=dict(tickmode="linear"),
+        yaxis_tickformat=",",
+        height=500,
+        xaxis_title="Year",
+        yaxis_title="Total Award Value ($)",
+        xaxis_tickangle=45,
+        showlegend=False
+    )
+
+    st.plotly_chart(fig_year, use_container_width=True)
+
 
     # ────────────────────────
     # Awards by State (Map)
