@@ -108,8 +108,10 @@ def render_award_insights():
     # ───────────────────────────────
     # State Trends (Year-over-Year)
     # ───────────────────────────────
-    state_yearly_df = load_sql_table("usaspending_state_yearly_totals")
+    state_yearly_df = load_sql_table("usaspending_state_yearly_trends")
     st.subheader("Year-over-Year Trends by State")
     selected_state = st.selectbox("Select a state", sorted(state_yearly_df['state'].dropna().unique()))
     filtered = state_yearly_df[state_yearly_df['state'] == selected_state]
     st.line_chart(filtered.set_index("year")["total_awarded"])
+
+
