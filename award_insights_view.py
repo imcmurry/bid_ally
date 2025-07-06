@@ -26,7 +26,7 @@ def render_award_insights():
             )
 
         if not runs_df.empty:
-            st.success(f"✅ Loaded cached results for NAICS {naics_code}")
+            st.success(f"✅ Results for: {naics_code}")
             run_id = runs_df["run_id"].iloc[0]
 
             # Load and filter all related tables
@@ -43,16 +43,16 @@ def render_award_insights():
             state_yearly_df = state_yearly_df[state_yearly_df["run_id"] == run_id]
 
         else:
-            st.warning(f"⚡ No cached result found. Running fresh scrape for NAICS {naics_code}...")
+            st.warning(f"⚡ Running... This may take up 30 seconds {naics_code}...")
             insights = get_all_usaspending_insights(naics_code)
             top_df = insights["top_recipients"].copy()
             yearly_df = insights["yearly_totals"].copy()
             state_df = insights["awards_by_state"].copy()
             state_yearly_df = insights["state_yearly_trends"].copy()
 
-            if st.button("💾 Save this result to database"):
-                push_insights_to_db(insights, naics_code)
-                st.success("Saved to database!")
+            push_insights_to_db(insights, naics_code)
+            st.success(f"✅ Data for NAICS {naics_code} saved.")
+
 
         # ────────────── CHART 1 ──────────────
         st.subheader("Top Recipients by Total Award Value")
