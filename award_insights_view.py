@@ -25,33 +25,43 @@ def render_award_insights():
                 params=(naics_code,)
             )
 
-        if not runs_df.empty:
-            st.success(f"✅ Results for: {naics_code}")
-            run_id = runs_df["run_id"].iloc[0]
+        force_rerun = False
 
-            # Load and filter all related tables
+        if not runs_df.empty:
+            run_id = runs_df["run_id"].iloc[0]
             top_df = load_sql_table("usaspending_top_recipients")
             top_df = top_df[top_df["run_id"] == run_id]
 
-            yearly_df = load_sql_table("usaspending_yearly_totals")
-            yearly_df = yearly_df[yearly_df["run_id"] == run_id]
+            if top_df.empty:
+                st.info("🔁 Existing data was empty — refreshing from source...")
+                force_rerun = True
+            else:
+                st.success(f"✅ Results for: {naics_code}")
+                yearly_df = load_sql_table("usaspending_yearly_totals")
+                yearly_df = yearly_df[yearly_df["run_id"] == run_id]
 
-            state_df = load_sql_table("usaspending_awards_by_state")
-            state_df = state_df[state_df["run_id"] == run_id]
+                state_df = load_sql_table("usaspending_awards_by_state")
+                state_df = state_df[state_df["run_id"] == run_id]
 
-            state_yearly_df = load_sql_table("usaspending_state_yearly_trends")
-            state_yearly_df = state_yearly_df[state_yearly_df["run_id"] == run_id]
+                state_yearly_df = load_sql_table("usaspending_state_yearly_trends")
+                state_yearly_df = state_yearly_df[state_yearly_df["run_id"] == run_id]
 
-        else:
-            st.warning(f"⚡ Running... This may take up 30 seconds")
+        if runs_df.empty or force_rerun:
+            st.warning(f"⚡ Collecting data for NAICS {naics_code}... Please wait up to 30 seconds.")
             insights = get_all_usaspending_insights(naics_code)
-            top_df = insights["top_recipients"].copy()
-            yearly_df = insights["yearly_totals"].copy()
-            state_df = insights["awards_by_state"].copy()
-            state_yearly_df = insights["state_yearly_trends"].copy()
 
-            push_insights_to_db(insights, naics_code)
-            st.success(f"✅ Data for NAICS {naics_code} saved.")
+            if any(not df.empty for df in insights.values()):
+                push_insights_to_db(insights, naics_code)
+                st.success(f"✅ Data for NAICS {naics_code} collected and saved.")
+
+                top_df = insights["top_recipients"].copy()
+                yearly_df = insights["yearly_totals"].copy()
+                state_df = insights["awards_by_state"].copy()
+                state_yearly_df = insights["state_yearly_trends"].copy()
+            else:
+                st.warning(f"⚠️ No contract award data found for NAICS {naics_code}. Nothing was saved.")
+                top_df = yearly_df = state_df = state_yearly_df = pd.DataFrame()  # Empty placeholders
+
 
 
         # ────────────── CHART 1 ──────────────
