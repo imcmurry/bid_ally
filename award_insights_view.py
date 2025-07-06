@@ -43,7 +43,7 @@ def render_award_insights():
             state_yearly_df = state_yearly_df[state_yearly_df["run_id"] == run_id]
 
         else:
-            st.warning(f"⚡ Running... This may take up 30 seconds {naics_code}...")
+            st.warning(f"⚡ Running... This may take up 30 seconds")
             insights = get_all_usaspending_insights(naics_code)
             top_df = insights["top_recipients"].copy()
             yearly_df = insights["yearly_totals"].copy()
