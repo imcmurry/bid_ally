@@ -4,6 +4,7 @@ import sqlite3
 import plotly.express as px
 from config import DB_PATH
 from usaspending import get_all_usaspending_insights, push_insights_to_db
+from gpt_analysis import generate_chart_insight
 
 @st.cache_data(show_spinner=False)
 def load_sql_table(table_name: str) -> pd.DataFrame:
@@ -16,8 +17,21 @@ def render_award_insights():
     # ────────────── INPUT ──────────────
     naics_code = st.text_input("Enter a NAICS code:", value="621999")
 
+    # ────────────── CLIENT INFO ──────────────
+    company_details = {
+        "company_name": "Acuity International",
+        "core_competencies": (
+            "Expeditionary integrated base operational support services, medical staffing, and logistics."
+        ),
+        "past_performance": (
+            "Served DOD, DOS, and USAID with support in conflict zones and austere environments."
+        ),
+        "unique_strengths": (
+            "Fast deployment, cost efficiency, medical specialization, and global readiness."
+        )
+    }
+
     if naics_code:
-        # Check if NAICS code already exists in runs
         with sqlite3.connect(DB_PATH) as conn:
             runs_df = pd.read_sql_query(
                 "SELECT * FROM usaspending_runs WHERE naics_code = ? ORDER BY timestamp DESC LIMIT 1",
@@ -60,9 +74,7 @@ def render_award_insights():
                 state_yearly_df = insights["state_yearly_trends"].copy()
             else:
                 st.warning(f"⚠️ No contract award data found for NAICS {naics_code}. Nothing was saved.")
-                top_df = yearly_df = state_df = state_yearly_df = pd.DataFrame()  # Empty placeholders
-
-
+                top_df = yearly_df = state_df = state_yearly_df = pd.DataFrame()
 
         # ────────────── CHART 1 ──────────────
         st.subheader("Top Recipients by Total Award Value")
@@ -82,6 +94,9 @@ def render_award_insights():
             xaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=1.2)
         )
         st.plotly_chart(fig_top, use_container_width=True)
+        with st.spinner("Analyzing strategic insight..."):
+            insight_1 = generate_chart_insight(top_df, "Top Recipients by Total Award Value", company_details)
+        st.markdown(f"**Insight:** {insight_1}")
 
         # ────────────── CHART 2 ──────────────
         st.subheader("Total Award Value By Year")
@@ -113,6 +128,9 @@ def render_award_insights():
             showlegend=False
         )
         st.plotly_chart(fig_year, use_container_width=True)
+        with st.spinner("Analyzing strategic insight..."):
+            insight_2 = generate_chart_insight(yearly_df, "Total Award Value By Year", company_details)
+        st.markdown(f"**Insight:** {insight_2}")
 
         # ────────────── CHART 3 ──────────────
         st.subheader("Award Value by State (Interactive Map)")
@@ -127,6 +145,9 @@ def render_award_insights():
             title="Total Federal Award Amount by State"
         )
         st.plotly_chart(fig_map, use_container_width=True)
+        with st.spinner("Analyzing strategic insight..."):
+            insight_3 = generate_chart_insight(state_df, "Total Award Value by State", company_details)
+        st.markdown(f"**Insight:** {insight_3}")
 
         # ────────────── CHART 4 ──────────────
         st.subheader("Average Year-over-Year Growth by State")
@@ -152,3 +173,6 @@ def render_award_insights():
             title="Average YoY Federal Contract Growth by State"
         )
         st.plotly_chart(fig_growth, use_container_width=True)
+        with st.spinner("Analyzing strategic insight..."):
+            insight_4 = generate_chart_insight(growth_summary, "YoY Growth by State", company_details)
+        st.markdown(f"**Insight:** {insight_4}")

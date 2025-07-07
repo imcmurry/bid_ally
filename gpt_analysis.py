@@ -234,3 +234,41 @@ def generate_news_impact_paragraph(insights: str,
         max_tokens=256
     )
     return response["choices"][0]["message"]["content"].strip()
+
+
+def generate_chart_insight(chart_data: pd.DataFrame, chart_type: str, company_details: dict) -> str:
+    """
+    Generate a strategic insight paragraph for a company based on chart data.
+    """
+    try:
+        csv_sample = chart_data.head(20).to_csv(index=False)
+
+        prompt = f"""
+        You are a federal contract strategist analyzing historical award data to generate insights for a company.
+
+        Company Information:
+        {json.dumps(company_details, indent=2)}
+
+        Chart Type:
+        {chart_type}
+
+        Chart Data (CSV Format):
+        {csv_sample}
+
+        Based on this information, provide a strategic 2–4 sentence insight for the company.
+        Focus on competitive positioning, opportunities, or warnings based on the data.
+        """
+
+        response = openai.ChatCompletion.create(
+            model=config.GPT_MODEL_CHAT,
+            messages=[
+                {"role": "system", "content": "You are a strategic analyst for government contracts."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.5,
+            max_tokens=300
+        )
+        return response["choices"][0]["message"]["content"].strip()
+
+    except Exception as e:
+        return f"[Insight generation failed: {e}]"
