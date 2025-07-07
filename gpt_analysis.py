@@ -6,6 +6,9 @@ from file_utils import extract_text_from_pdfs, truncate_to_token_limit
 import os
 import json
 import time
+import pandas as pd
+import json
+
 
 # Set the OpenAI API key from config
 openai.api_key = config.OPENAI_API_KEY
