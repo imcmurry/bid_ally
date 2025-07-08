@@ -133,3 +133,5 @@ ROOT = Path(__file__).parent
 DATA_PATH = ROOT / "combined_results_test1.json"
 
 DB_PATH = ROOT / "bid_ally.db"
+
+PERPLEXITY_KEY = "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"

@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 import plotly.express as px
-from config import DB_PATH, company_info
+from config import DB_PATH, company_info, PERPLEXITY_KEY
 from usaspending import get_all_usaspending_insights, push_insights_to_db
 from gpt_analysis import generate_chart_insight, generate_competitor_positioning_insight
 
@@ -83,7 +83,7 @@ def render_award_insights():
         )
         st.plotly_chart(fig_top, use_container_width=True)
         with st.spinner("Analyzing competitors with Perplexity..."):
-            insight_1 = generate_competitor_positioning_insight(top_df, company_info, perplexity_key="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")
+            insight_1 = generate_competitor_positioning_insight(top_df, company_info, perplexity_key=PERPLEXITY_KEY)
         st.markdown(f"**Competitive Insight:** {insight_1}")
 
 
