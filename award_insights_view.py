@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 import plotly.express as px
-from config import DB_PATH
+from config import DB_PATH, company_info
 from usaspending import get_all_usaspending_insights, push_insights_to_db
-from gpt_analysis import generate_chart_insight
+from gpt_analysis import generate_chart_insight, generate_competitor_positioning_insight
 
 @st.cache_data(show_spinner=False)
 def load_sql_table(table_name: str) -> pd.DataFrame:
@@ -17,19 +17,7 @@ def render_award_insights():
     # ────────────── INPUT ──────────────
     naics_code = st.text_input("Enter a NAICS code:", value="621999")
 
-    # ────────────── CLIENT INFO ──────────────
-    company_details = {
-        "company_name": "Acuity International",
-        "core_competencies": (
-            "Expeditionary integrated base operational support services, medical staffing, and logistics."
-        ),
-        "past_performance": (
-            "Served DOD, DOS, and USAID with support in conflict zones and austere environments."
-        ),
-        "unique_strengths": (
-            "Fast deployment, cost efficiency, medical specialization, and global readiness."
-        )
-    }
+
 
     if naics_code:
         with sqlite3.connect(DB_PATH) as conn:
@@ -94,9 +82,10 @@ def render_award_insights():
             xaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=1.2)
         )
         st.plotly_chart(fig_top, use_container_width=True)
-        with st.spinner("Analyzing strategic insight..."):
-            insight_1 = generate_chart_insight(top_df, "Top Recipients by Total Award Value", company_details)
-        st.markdown(f"**Insight:** {insight_1}")
+        with st.spinner("Analyzing competitors with Perplexity..."):
+            insight_1 = generate_competitor_positioning_insight(top_df, company_info, perplexity_key="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")
+        st.markdown(f"**Competitive Insight:** {insight_1}")
+
 
         # ────────────── CHART 2 ──────────────
         st.subheader("Total Award Value By Year")
@@ -129,7 +118,7 @@ def render_award_insights():
         )
         st.plotly_chart(fig_year, use_container_width=True)
         with st.spinner("Analyzing strategic insight..."):
-            insight_2 = generate_chart_insight(yearly_df, "Total Award Value By Year", company_details)
+            insight_2 = generate_chart_insight(yearly_df, "Total Award Value By Year", company_info)
         st.markdown(f"**Insight:** {insight_2}")
 
         # ────────────── CHART 3 ──────────────
@@ -146,7 +135,7 @@ def render_award_insights():
         )
         st.plotly_chart(fig_map, use_container_width=True)
         with st.spinner("Analyzing strategic insight..."):
-            insight_3 = generate_chart_insight(state_df, "Total Award Value by State", company_details)
+            insight_3 = generate_chart_insight(state_df, "Total Award Value by State", company_info)
         st.markdown(f"**Insight:** {insight_3}")
 
         # ────────────── CHART 4 ──────────────
@@ -174,5 +163,5 @@ def render_award_insights():
         )
         st.plotly_chart(fig_growth, use_container_width=True)
         with st.spinner("Analyzing strategic insight..."):
-            insight_4 = generate_chart_insight(growth_summary, "YoY Growth by State", company_details)
+            insight_4 = generate_chart_insight(growth_summary, "YoY Growth by State", company_info)
         st.markdown(f"**Insight:** {insight_4}")

@@ -8,7 +8,7 @@ import json
 import time
 import pandas as pd
 import json
-
+import requests
 
 # Set the OpenAI API key from config
 openai.api_key = config.OPENAI_API_KEY
@@ -275,3 +275,83 @@ def generate_chart_insight(chart_data: pd.DataFrame, chart_type: str, company_de
 
     except Exception as e:
         return f"[Insight generation failed: {e}]"
+
+
+
+def fetch_perplexity_summary(company_name: str, perplexity_key: str) -> str:
+    """
+    Query the Perplexity API to get a company overview with government contracting focus.
+    """
+    headers = {
+        "Authorization": f"Bearer {perplexity_key}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": "sonar-pro",
+        "messages": [
+            {
+                "role": "user",
+                "content": f"Summarize what the company {company_name} does, especially in the context of U.S. federal contracts. Highlight strengths, focus areas, and past performance."
+            }
+        ]
+    }
+
+    try:
+        response = requests.post("https://api.perplexity.ai/chat/completions", headers=headers, json=data)
+        return response.json()["choices"][0]["message"]["content"]
+    except Exception as e:
+        return f"[Error fetching summary for {company_name}: {e}]"
+
+
+def generate_competitor_positioning_insight(top_df: pd.DataFrame,
+                                            client_info: dict,
+                                            perplexity_key: str) -> str:
+    """
+    Generate a strategic insight on how the client can position themselves
+    against the top federal awardees based on live Perplexity web results.
+    """
+    import openai
+
+    # Pull top 10 company names
+    top_companies = top_df["recipient_name"].head(10).tolist()
+    company_profiles = {}
+
+    for name in top_companies:
+        summary = fetch_perplexity_summary(name, perplexity_key)
+        company_profiles[name] = summary
+
+    # Construct prompt
+    prompt = f"""
+You are a senior strategic advisor for a government contractor.
+
+Your client is:
+{json.dumps(client_info, indent=2)}
+
+The following companies are the top 10 recipients of federal awards in this NAICS code:
+{top_companies}
+
+Below are Perplexity-based summaries of these companies and their competitive positioning:
+
+{json.dumps(company_profiles, indent=2)}
+
+Based on this information:
+- Recommend whether the client should target or avoid competing with any of these companies.
+- Explain which competitors represent threats vs. opportunities.
+- Suggest a clear positioning strategy for the client that exploits unique advantages or avoids vulnerable areas.
+
+Be candid, strategic, and insightful. Avoid generic statements. Focus on specifics where possible.
+"""
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a strategic advisor for government contractors."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.5,
+            max_tokens=700
+        )
+        return response["choices"][0]["message"]["content"].strip()
+    except Exception as e:
+        return f"[GPT Insight Generation Error: {e}]"
