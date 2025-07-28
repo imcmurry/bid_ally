@@ -355,3 +355,95 @@ Be candid, strategic, and insightful. Avoid generic statements. Focus on specifi
         return response["choices"][0]["message"]["content"].strip()
     except Exception as e:
         return f"[GPT Insight Generation Error: {e}]"
+
+def fetch_perplexity_year_insight(year: int, naics_code: str, perplexity_key: str) -> str:
+    """
+    Uses Perplexity API to summarize NAICS-specific federal spending and trends in a given year.
+    """
+    import requests
+
+    headers = {
+        "Authorization": f"Bearer {perplexity_key}",
+        "Content-Type": "application/json"
+    }
+
+    # Enhanced, NAICS-focused prompt
+    prompt_text = (
+        f"Summarize U.S. federal contracting trends, spending priorities, and policy changes in {year} "
+        f"related to NAICS code {naics_code}. Include insights on agencies involved, notable contracts, "
+        f"funding shifts, and emerging topics. Be specific and avoid generalizations. If data is limited, "
+        f"include adjacent or related sector activity."
+    )
+
+    data = {
+        "model": "sonar-pro",
+        "messages": [
+            {
+                "role": "user",
+                "content": prompt_text
+            }
+        ]
+    }
+
+    try:
+        response = requests.post("https://api.perplexity.ai/chat/completions", headers=headers, json=data)
+        return response.json()["choices"][0]["message"]["content"]
+    except Exception as e:
+        return f"[Error fetching Perplexity summary for {year}: {e}]"
+
+def generate_trend_insight_by_year(yearly_df: pd.DataFrame,
+                                   chart_title: str,
+                                   client_info: dict,
+                                   naics_code: str,
+                                   perplexity_key: str) -> str:
+    """
+    Generates insight narrative with NAICS-specific context for year-by-year trends.
+    """
+    import openai
+    import json
+
+    recent_years = yearly_df["year"].astype(int).dropna().sort_values(ascending=False).unique()[:5]
+    perplexity_insights = {}
+
+    for year in recent_years:
+        summary = fetch_perplexity_year_insight(year, naics_code, perplexity_key)
+        perplexity_insights[str(year)] = summary
+
+    prompt = f"""
+You are a federal market strategist helping a client analyze multi-year federal spending trends.
+
+Client Info:
+{json.dumps(client_info, indent=2)}
+
+NAICS Code: {naics_code}
+
+Chart Context: {chart_title}
+
+Recent Yearly Award Totals:
+{yearly_df[yearly_df['year'].isin(recent_years)][['year', 'total_awarded']].to_string(index=False)}
+
+Perplexity-based web context for NAICS {naics_code}:
+{json.dumps(perplexity_insights, indent=2)}
+
+Generate a detailed and strategic insight that includes:
+- Real explanations for peaks or declines in award values
+- Specific agency or program shifts if relevant
+- Opportunities and risks based on recent policy or market moves
+- Recommendations for the client's positioning
+
+Be specific. Avoid generic boilerplate.
+"""
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a federal contracting strategy advisor."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.5,
+            max_tokens=750
+        )
+        return response["choices"][0]["message"]["content"].strip()
+    except Exception as e:
+        return f"[GPT Insight Generation Error: {e}]"

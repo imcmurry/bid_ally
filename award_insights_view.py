@@ -4,7 +4,7 @@ import sqlite3
 import plotly.express as px
 from config import DB_PATH, company_info, PERPLEXITY_KEY
 from usaspending import get_all_usaspending_insights, push_insights_to_db
-from gpt_analysis import generate_chart_insight, generate_competitor_positioning_insight
+from gpt_analysis import generate_chart_insight, generate_competitor_positioning_insight, generate_trend_insight_by_year
 
 @st.cache_data(show_spinner=False)
 def load_sql_table(table_name: str) -> pd.DataFrame:
@@ -118,7 +118,14 @@ def render_award_insights():
         )
         st.plotly_chart(fig_year, use_container_width=True)
         with st.spinner("Analyzing strategic insight..."):
-            insight_2 = generate_chart_insight(yearly_df, "Total Award Value By Year", company_info)
+            insight_2 = generate_trend_insight_by_year(
+                yearly_df,
+                "Total Award Value By Year",
+                company_info,
+                naics_code=naics_code,
+                perplexity_key=PERPLEXITY_KEY
+            )
+
         st.markdown(f"**Insight:** {insight_2}")
 
         # ────────────── CHART 3 ──────────────
