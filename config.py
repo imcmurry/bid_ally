@@ -96,7 +96,7 @@ RAW_OUTPUT_JSON = "raw_api_data_files.json"
 # 5) RSS / XML SETTINGS
 # ------------------------------------------------------------------------------
 # Database name
-DB_NAME = "rss_data6.db"
+DB_NAME = "rss_data7.db"
 
 # Namespace used for <content:encoded> in the RSS feeds
 XML_NAMESPACES = {
