@@ -145,7 +145,7 @@ def parse_feed(feed_content):
 # Main Pipeline
 ########################################################################
 
-def run_pipeline(db_name="rss_data6.db"):
+def run_pipeline(db_name="rss_data7.db"):
     start_time = time.time()
     conn = setup_database(db_name)
 
