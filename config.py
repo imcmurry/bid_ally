@@ -124,10 +124,8 @@ GPT_MAX_TOKENS = 1024
 
 
 #8) SAM SETTINGS
-SAM_SEARCH_KEYWORDS = [
-    "guam"
-    
-]
+SAM_SEARCH_KEYWORDS = ["cargo", "air freight"]
+SAM_REGIONS = ["guam", "CNMI"]
 
 ROOT = Path(__file__).parent
 DATA_PATH = ROOT / "combined_results_test1.json"
