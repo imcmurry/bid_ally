@@ -22,7 +22,7 @@ def generate_insights(content: str,
     GPT insights with hard cap on internal retries to prevent infinite loop.
     """
     import time, os, json, tiktoken
-    from openai.error import InvalidRequestError, RateLimitError
+    from openai import InvalidRequestError, RateLimitError
 
     MAX_INTERNAL_RETRIES = 3
     reduction_pct = 1.0
@@ -89,7 +89,7 @@ def generate_swot_analysis(content: str,
     GPT SWOT with capped internal retries.
     """
     import time, os, json, tiktoken
-    from openai.error import InvalidRequestError, RateLimitError
+    from openai import InvalidRequestError, RateLimitError
 
     MAX_INTERNAL_RETRIES = 3
     reduction_pct = 1.0
@@ -141,7 +141,7 @@ def generate_solicitation_tags(content: str,
     GPT tag generation with retry cap.
     """
     import time, os, json, tiktoken
-    from openai.error import InvalidRequestError, RateLimitError
+    from openai import InvalidRequestError, RateLimitError
 
     MAX_INTERNAL_RETRIES = 3
     reduction_pct = 1.0

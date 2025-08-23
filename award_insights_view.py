@@ -140,10 +140,7 @@ def render_award_insights():
             labels={"total_awarded": "Total Awarded ($)"},
             title="Total Federal Award Amount by State"
         )
-        st.plotly_chart(fig_map, use_container_width=True)
-        with st.spinner("Analyzing strategic insight..."):
-            insight_3 = generate_chart_insight(state_df, "Total Award Value by State", company_info)
-        st.markdown(f"**Insight:** {insight_3}")
+
 
         # ────────────── CHART 4 ──────────────
         st.subheader("Average Year-over-Year Growth by State")
@@ -168,7 +165,3 @@ def render_award_insights():
             labels={"avg_growth_rate_percent": "Avg YoY Growth (%)"},
             title="Average YoY Federal Contract Growth by State"
         )
-        st.plotly_chart(fig_growth, use_container_width=True)
-        with st.spinner("Analyzing strategic insight..."):
-            insight_4 = generate_chart_insight(growth_summary, "YoY Growth by State", company_info)
-        st.markdown(f"**Insight:** {insight_4}")
