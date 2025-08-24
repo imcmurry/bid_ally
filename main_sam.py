@@ -13,6 +13,8 @@ from gpt_analysis import (
 )                                                    # gpt_analysis.py :contentReference[oaicite:4]{index=4}&#8203;:contentReference[oaicite:5]{index=5}
 from news_relevance import article_is_relevant       # news_relevance.py :contentReference[oaicite:6]{index=6}&#8203;:contentReference[oaicite:7]{index=7}
 from file_utils import filter_attachments
+from sam_api_fetcher import _build_query_and_mode
+
 
 def run_sam_pipeline(
     *,
@@ -37,6 +39,10 @@ def run_sam_pipeline(
         print(f"📁 Loaded {len(notices)} notices from {notice_cache_file}")
     else:
         print("📡 Fetching notices from SAM API …")
+
+        q, mode = _build_query_and_mode(config.SAM_SEARCH_KEYWORDS)
+        print(f"Using SAM query [{mode}]: {q}")
+
         notices = fetch_sam_notices(config.SAM_SEARCH_KEYWORDS)
         with open(notice_cache_file, "w", encoding="utf-8") as f:
             json.dump(notices, f, indent=2, ensure_ascii=False)
