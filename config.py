@@ -128,7 +128,7 @@ SAM_SEARCH_KEYWORDS = ["cargo", "air freight"]
 SAM_REGIONS = ["guam", "CNMI"]
 
 ROOT = Path(__file__).parent
-DATA_PATH = ROOT / "combined_results_test1.json"
+DATA_PATH = ROOT / "sam_results_pacific_cargo.json"
 
 DB_PATH = ROOT / "bid_ally.db"
 

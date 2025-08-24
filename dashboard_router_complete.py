@@ -12,7 +12,7 @@ from single_solicitation_view import render_single_solicitation
 # ────────────────────────────────────────────────────────────────────────────
 
 ROOT = Path(__file__).parent
-DATA_PATH = ROOT / "combined_results_test1.json"
+DATA_PATH = ROOT / "sam_results_pacific_cargo.json"
 
 @st.cache_data(show_spinner=False)
 def load_data(path: Path) -> pd.DataFrame:
