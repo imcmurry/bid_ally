@@ -1,37 +1,81 @@
 # news_relevance.py
 
 import math
-import openai
 import config
 
-# 1) We import scikit-learn for TF-IDF local pre-filter
+# 1) scikit-learn for TF-IDF local pre-filter
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Set OpenAI key here (you can also do this just once in your main script)
-openai.api_key = config.OPENAI_API_KEY
+# --- OpenAI SDK compatibility (v0.x vs v1.x) -------------------------------
+try:
+    # New SDK (v1.x)
+    from openai import OpenAI, BadRequestError, RateLimitError
+    client = OpenAI(api_key=getattr(config, "OPENAI_API_KEY", None))
+    _OPENAI_V1 = True
+except Exception:
+    # Legacy SDK (v0.x)
+    import openai
+    from openai import InvalidRequestError as BadRequestError, RateLimitError
+    openai.api_key = getattr(config, "OPENAI_API_KEY", None)
+    client = None
+    _OPENAI_V1 = False
+
+
+def _embed(text: str, model: str | None = None) -> list[float]:
+    """
+    Return a single embedding vector for the given text, across SDK versions.
+    """
+    model = (
+        model
+        or getattr(config, "GPT_MODEL_EMBEDDING", None)
+        or getattr(config, "GPT_EMBED_MODEL", "text-embedding-3-small")
+    )
+    if _OPENAI_V1:
+        resp = client.embeddings.create(model=model, input=text)
+        return resp.data[0].embedding
+    else:
+        resp = openai.Embedding.create(model=model, input=text)
+        return resp["data"][0]["embedding"]
+
+
+def _chat_complete(model: str, messages: list, temperature: float, max_tokens: int) -> str:
+    """
+    Uniform chat completion wrapper for both SDKs.
+    """
+    if _OPENAI_V1:
+        resp = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+        return resp.choices[0].message.content
+    else:
+        resp = openai.ChatCompletion.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+        return resp["choices"][0]["message"]["content"]
+
 
 def compute_cosine_similarity(vec_a: list[float], vec_b: list[float]) -> float:
     """
     Compute the cosine similarity between two vectors.
-    Both vectors must have the same dimension.
     """
     if len(vec_a) != len(vec_b):
         raise ValueError("Vectors must be the same dimension.")
-
     dot_product = 0.0
     norm_a = 0.0
     norm_b = 0.0
-
     for a, b in zip(vec_a, vec_b):
         dot_product += a * b
         norm_a += a * a
         norm_b += b * b
-
-    # Avoid division by zero
     if norm_a == 0.0 or norm_b == 0.0:
         return 0.0
-
     return dot_product / (math.sqrt(norm_a) * math.sqrt(norm_b))
 
 
@@ -40,114 +84,82 @@ def passes_local_pre_filter(article_text: str,
                             local_threshold: float = 0.05,
                             debug: bool = False) -> bool:
     """
-    Quickly check relevance via a local TF-IDF approach (no GPT).
-    We compare just these two documents (article vs. entire solicitation text)
-    and compute a simple cosine similarity on their TF-IDF vectors.
-
-    :param article_text: Full text of the news article.
-    :param solicitation_text: Full text of the solicitation or a summary of it.
-    :param local_threshold: If the TF-IDF similarity is below this, we skip the GPT check.
-    :param debug: If True, prints out debug info (similarity score, threshold).
-    :return: True if local similarity >= local_threshold, else False.
+    Fast TF‑IDF similarity pre‑filter (no GPT).
     """
-    # Combine them into a 2-document list
     docs = [solicitation_text, article_text]
-
-    # Build TF-IDF for these 2 docs
     vectorizer = TfidfVectorizer(stop_words="english", min_df=1)
     tfidf_matrix = vectorizer.fit_transform(docs)
-    # tfidf_matrix will be shape (2, vocab_size)
-
-    # Compute cosine similarity between doc0 (solicitation) and doc1 (article)
     sim = cosine_similarity(tfidf_matrix[0], tfidf_matrix[1])[0, 0]
-
     if debug:
         print(f"[DEBUG - local_pre_filter] TF-IDF Cosine Similarity: {sim:.4f}, Threshold={local_threshold}")
-
     return sim >= local_threshold
 
 
 def generate_tags_multi_step(article_text: str, debug: bool = False) -> list[str]:
     """
-    MULTI-STEP TAG GENERATION:
-      1) Identify the domain or sector from the article text in a first GPT call.
-      2) Generate short keyword tags focusing on that domain, in a second GPT call.
-
-    Example use case:
-      tags = generate_tags_multi_step(article_text, debug=True)
+    MULTI‑STEP TAG GENERATION via chat API (v1/v0 compatible).
     """
-    # STEP 1) Identify Domain or Sector
     step1_prompt = f"""
-    You are a domain expert. Examine the following text and identify the *main domain(s) or sector(s)* it pertains to.
-    For example, "naval technology," "military aerospace," "health and pharmaceuticals," "renewable energy," etc.
+You are a domain expert. Examine the following text and identify the *main domain(s) or sector(s)* it pertains to.
+Return one to three short labels, comma-separated.
 
-    The text is:
-    ---
-    {article_text}
-    ---
-
-    Please return one to three short domain/sector labels in a single line, comma-separated, e.g.:
-    "naval technology, submarine manufacturing" or "pharmaceutical research".
-    If the text is unclear, do your best guess.
-    """
-
+Text:
+---
+{article_text}
+---
+"""
     if debug:
         print("[DEBUG] Step 1 Prompt (Identify Domain):")
         print(step1_prompt)
         print()
 
-    response_step1 = openai.ChatCompletion.create(
-        model=config.GPT_MODEL_CHAT,  # e.g., "gpt-3.5-turbo" or "gpt-4o"
+    domain_line = _chat_complete(
+        model=getattr(config, "GPT_MODEL_CHAT", "gpt-4o"),
         messages=[
             {"role": "system", "content": "You are an expert in identifying the domain or sector of a text."},
-            {"role": "user", "content": step1_prompt}
+            {"role": "user", "content": step1_prompt},
         ],
         temperature=0.3,
         max_tokens=200
-    )
-    domain_line = response_step1["choices"][0]["message"]["content"].strip()
+    ).strip()
 
     if debug:
         print("[DEBUG] Step 1 GPT Response (Identified Domain(s)):")
         print(domain_line)
         print()
 
-    # STEP 2) Generate Final Tags
     step2_prompt = f"""
-    We have identified the following domain(s) or sector(s): {domain_line}
+We identified these domain(s)/sector(s): {domain_line}
 
-    Now, given the text and these domain labels, please generate 3-5 short keyword tags
-    that best capture the text's specific topics. Avoid overly generic words or unrelated domains.
-    Provide them in a comma-separated format. For example: "naval engineering, submarine stealth, industrial espionage"
+Now generate 3-5 short keyword tags that best capture specific topics in the text.
+Return them comma-separated.
 
-    The text again is:
-    ---
-    {article_text}
-    ---
-    """
-
+Text:
+---
+{article_text}
+---
+"""
     if debug:
         print("[DEBUG] Step 2 Prompt (Generate Final Tags):")
         print(step2_prompt)
         print()
 
-    response_step2 = openai.ChatCompletion.create(
-        model=config.GPT_MODEL_CHAT,
+    tags_text = _chat_complete(
+        model=getattr(config, "GPT_MODEL_CHAT", "gpt-4o"),
         messages=[
             {"role": "system", "content": "You are an expert in generating short keyword tags for a given domain."},
-            {"role": "user", "content": step2_prompt}
+            {"role": "user", "content": step2_prompt},
         ],
         temperature=0.5,
         max_tokens=200
-    )
-    tags_text = response_step2["choices"][0]["message"]["content"].strip()
+    ).strip()
 
     if debug:
         print("[DEBUG] Step 2 GPT Response (Raw Tags):")
         print(tags_text)
         print()
 
-    final_tags = [tag.strip() for tag in tags_text.split(",") if tag.strip()]
+    final_tags = [t.strip() for t in tags_text.split(",") if t.strip()]
 
     if debug:
         print("[DEBUG] Final Multi-Step Tags:")
@@ -165,28 +177,14 @@ def article_is_relevant(article_title: str,
                         local_threshold: float = 0.05,
                         debug: bool = True) -> bool:
     """
-    1) First, a local TF-IDF pre-filter checks if the article is obviously irrelevant.
-       If it fails, we skip GPT calls and return False.
-
-    2) If it passes local_pre_filter, we do the existing "weighted-average similarity"
-       approach with GPT embeddings, giving the first tag the highest weight, etc.
-
-    :param article_text: Full text of the news article (title + description + content).
-    :param solicitation_tags: List of tags describing the solicitation. The first is most important.
-    :param solicitation_text: The entire text (or summary) of the solicitation for local TF-IDF filtering.
-    :param threshold: Cosine similarity threshold for GPT-based weighted-average result.
-                     Defaults to config.RELEVANCE_THRESHOLD if None.
-    :param local_threshold: TF-IDF similarity threshold for the local pre-filter. Default=0.1
-    :param debug: If True, print debug logs.
+    1) TF‑IDF local pre‑filter (cheap).
+    2) If it passes, compute weighted average cosine similarity between
+       the article embedding and each tag embedding.
     """
-    from news_relevance import compute_cosine_similarity
-
     if threshold is None:
-        threshold = config.RELEVANCE_THRESHOLD  # e.g. 0.85 in config
+        threshold = getattr(config, "RELEVANCE_THRESHOLD", 0.75)  # default if not set
 
-    # --------------------
-    # Step 1: Local Pre-Filter
-    # --------------------
+    # --- Step 1: local pre‑filter
     if not passes_local_pre_filter(article_text, solicitation_text, local_threshold=local_threshold, debug=debug):
         if debug:
             print(f"[DEBUG] Article: {article_title}")
@@ -197,39 +195,37 @@ def article_is_relevant(article_title: str,
             print(f"[DEBUG] Article: {article_title}")
             print(f"[DEBUG] Article ({article_title}) PASSED local pre-filter (threshold={local_threshold}), continuing to GPT embedding.\n")
 
-    # --------------------
-    # Step 2: Weighted-Average GPT Similarity
-    # --------------------
-    N = len(solicitation_tags)
+    # --- Step 2: weighted average similarity with embeddings
+    N = len(solicitation_tags or [])
     if N == 0:
         if debug:
             print("[DEBUG] No tags were provided, returning False by default.")
         return False
 
-    # Descending weights, e.g. if N=3 => [3, 2, 1]
-    weights = [N - i for i in range(N)]
-
+    weights = [N - i for i in range(N)]  # e.g., N=3 -> [3,2,1]
     if debug:
         print(f"[DEBUG] Weighted-Average Similarity Approach, Found {N} tag(s). Weights: {weights}")
         print(f"[DEBUG] GPT Threshold set to {threshold}. Embedding article text (length={len(article_text)}).")
 
-    # (A) Embed the entire article text
-    article_response = openai.Embedding.create(
-        input=article_text,
-        model=config.GPT_MODEL_EMBEDDING
-    )
-    article_embedding = article_response["data"][0]["embedding"]
+    # Embed article
+    try:
+        article_embedding = _embed(article_text)
+    except Exception as e:
+        if debug:
+            print(f"[DEBUG] Failed to embed article: {e}")
+        return False
 
-    # (B) Compute weighted similarities
+    # Weighted similarities
     sum_weighted_sims = 0.0
     total_weight = 0.0
 
     for weight, tag in zip(weights, solicitation_tags):
-        tag_response = openai.Embedding.create(
-            input=tag,
-            model=config.GPT_MODEL_EMBEDDING
-        )
-        tag_embedding = tag_response["data"][0]["embedding"]
+        try:
+            tag_embedding = _embed(tag)
+        except Exception as e:
+            if debug:
+                print(f"[DEBUG] Failed to embed tag '{tag}': {e}")
+            continue
 
         similarity = compute_cosine_similarity(article_embedding, tag_embedding)
         sum_weighted_sims += similarity * weight
@@ -238,6 +234,11 @@ def article_is_relevant(article_title: str,
         if debug:
             print(f"[DEBUG] Tag='{tag}', Weight={weight}, Similarity={similarity:.4f}, "
                   f"Weighted Contribution={(similarity * weight):.4f}")
+
+    if total_weight == 0.0:
+        if debug:
+            print("[DEBUG] No tag embeddings were computed; returning False.")
+        return False
 
     weighted_avg = sum_weighted_sims / total_weight
 
@@ -248,24 +249,15 @@ def article_is_relevant(article_title: str,
 
 
 # ----------------------------------------------------------------
-# Test Harness
+# Test harness (optional)
 # ----------------------------------------------------------------
 if __name__ == "__main__":
-    """
-    Run 'python news_relevance.py' to:
-      - test the local TF-IDF pre-filter
-      - test the multi-step tag generation
-      - test the final GPT-based relevance
-    """
-
     test_article_text = (
         "Naval Group charges rival ThyssenKrupp with selling out submarine tech. "
         "The legal battle could escalate, impacting future submarine manufacturing "
         "contracts and allied cooperation across Europe. Meanwhile, defense industry "
         "analysts question the strategic ramifications of sharing sensitive technology."
     )
-
-    # Suppose our solicitation is also about submarine manufacturing, stored in a string:
     test_solicitation_text = (
         "This solicitation is for the design and construction of advanced submarine vessels, "
         "focusing on stealth technology, defense systems, and hull manufacturing. "
@@ -273,24 +265,21 @@ if __name__ == "__main__":
     )
 
     print("=== Testing local TF-IDF pre-filter ===")
-    passes_filter = passes_local_pre_filter(test_article_text, test_solicitation_text, local_threshold=0.1, debug=True)
-    print(f"Local filter pass? {passes_filter}")
-    print("")
+    print(passes_local_pre_filter(test_article_text, test_solicitation_text, local_threshold=0.1, debug=True))
+    print()
 
     print("=== Testing Multi-Step Tag Generation ===")
-    tags = generate_tags_multi_step(test_article_text, debug=True)
-    print(f"Final Tags from Multi-Step Approach: {tags}\n")
+    print(generate_tags_multi_step(test_article_text, debug=True))
+    print()
 
     print("=== Testing Weighted-Average Relevance Check with Pre-Filter ===")
-    # Suppose we have some solicitation tags (just an example):
     solicitation_tags = ["naval engineering", "submarine manufacturing", "stealth technology"]
-
-    relevant = article_is_relevant(
+    print(article_is_relevant(
+        article_title="Dummy",
         article_text=test_article_text,
         solicitation_tags=solicitation_tags,
         solicitation_text=test_solicitation_text,
         threshold=0.75,
         local_threshold=0.1,
         debug=True
-    )
-    print(f"Final result: Is the article relevant? {relevant}")
+    ))

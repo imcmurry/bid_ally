@@ -1,7 +1,7 @@
 # gpt_analysis.py
 
 import config
-from file_utils import extract_text_from_pdfs, truncate_to_token_limit
+from file_utils import extract_text_from_files, truncate_to_token_limit
 import os
 import json
 import time
@@ -65,7 +65,7 @@ def generate_insights(content: str,
     enc = tiktoken.get_encoding("cl100k_base")
 
     base_info = f"{description}\n{content}\n{description_byte}"
-    extracted_text = extract_text_from_pdfs(pdf_files)
+    extracted_text = extract_text_from_files(pdf_files)
 
     while reduction_pct > 0.05 and step < MAX_INTERNAL_RETRIES:
         step += 1

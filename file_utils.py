@@ -154,6 +154,23 @@ def extract_text_from_doc(file_path: str) -> str:
         print(f"⚠️ Unexpected error running antiword on {file_path}: {e}")
         return ""
 
+def extract_text_from_xlsx(file_path: str) -> str:
+    """
+    Extracts text from .xls/.xlsx by reading all sheets via pandas.
+    """
+    try:
+        import pandas as pd
+        sheets = pd.read_excel(file_path, sheet_name=None)
+        parts = []
+        for name, df in sheets.items():
+            parts.append(f"[Sheet: {name}]")
+            # Keep it readable: no index, limit very wide spreadsheets
+            parts.append(df.to_string(index=False, max_rows=100, max_cols=20))
+        return "\n\n".join(parts).strip()
+    except Exception as e:
+        print(f"⚠️ Error extracting text from spreadsheet {file_path}: {e}")
+        return ""
+
 
 def extract_text_from_files(file_paths: list[str]) -> str:
     """
@@ -191,6 +208,12 @@ def extract_text_from_files(file_paths: list[str]) -> str:
             doc_txt = extract_text_from_doc(fp)
             if doc_txt:
                 segments.append(doc_txt)
+        
+        elif ext in (".xls", ".xlsx"):
+            xls_txt = extract_text_from_xlsx(fp)
+            if xls_txt:
+                segments.append(xls_txt)
+
 
         else:
             print(f"⚠️ Skipping unsupported file type: {fp}")

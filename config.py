@@ -26,7 +26,7 @@ openai.api_project = "proj_cyHvUEE26hU3JeOc9juN6Yoh"
 GPT_MODEL_CHAT = "gpt-4o"
 
 # The model for embeddings (used in article relevance checks)
-GPT_MODEL_EMBEDDING = "text-embedding-ada-002"
+GPT_MODEL_EMBEDDING = "text-embedding-3-small"
 
 
 # ------------------------------------------------------------------------------
