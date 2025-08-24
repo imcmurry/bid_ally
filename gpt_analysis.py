@@ -1,17 +1,53 @@
 # gpt_analysis.py
 
-import openai
 import config
 from file_utils import extract_text_from_pdfs, truncate_to_token_limit
 import os
 import json
 import time
 import pandas as pd
-import json
 import requests
 
-# Set the OpenAI API key from config
-openai.api_key = config.OPENAI_API_KEY
+# --- OpenAI SDK compatibility (v0.x vs v1.x) -------------------------------
+# Creates a unified `client` and `_chat_complete(...)` so the rest of the code
+# doesn't care which SDK version is installed.
+try:
+    # New SDK (v1.x)
+    from openai import OpenAI, RateLimitError, BadRequestError
+    client = OpenAI(api_key=config.OPENAI_API_KEY)
+    _OPENAI_V1 = True
+
+    # Provide legacy name for downstream code that expects InvalidRequestError
+    InvalidRequestError = BadRequestError
+
+except Exception:
+    # Legacy SDK (v0.x)
+    import openai
+    from openai import InvalidRequestError, RateLimitError
+    openai.api_key = config.OPENAI_API_KEY
+    client = None
+    _OPENAI_V1 = False
+
+
+def _chat_complete(model: str, messages: list, temperature: float, max_tokens: int) -> str:
+    """Uniform chat completion wrapper for both SDKs."""
+    if _OPENAI_V1:
+        resp = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+        return resp.choices[0].message.content
+    else:
+        resp = openai.ChatCompletion.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+        return resp["choices"][0]["message"]["content"]
+
 
 # ---------- 1.  INSIGHTS -------------------------------------------------
 def generate_insights(content: str,
@@ -21,8 +57,7 @@ def generate_insights(content: str,
     """
     GPT insights with hard cap on internal retries to prevent infinite loop.
     """
-    import time, os, json, tiktoken
-    from openai import InvalidRequestError, RateLimitError
+    import tiktoken
 
     MAX_INTERNAL_RETRIES = 3
     reduction_pct = 1.0
@@ -53,7 +88,7 @@ def generate_insights(content: str,
         """
 
         try:
-            response = openai.ChatCompletion.create(
+            content_out = _chat_complete(
                 model=config.GPT_MODEL_CHAT,
                 messages=[
                     {"role": "system",
@@ -63,7 +98,7 @@ def generate_insights(content: str,
                 temperature=config.GPT_TEMPERATURE,
                 max_tokens=config.GPT_MAX_TOKENS
             )
-            return response["choices"][0]["message"]["content"].strip()
+            return content_out.strip()
 
         except (InvalidRequestError, RateLimitError) as e:
             err = str(e).lower()
@@ -88,8 +123,7 @@ def generate_swot_analysis(content: str,
     """
     GPT SWOT with capped internal retries.
     """
-    import time, os, json, tiktoken
-    from openai import InvalidRequestError, RateLimitError
+    import tiktoken
 
     MAX_INTERNAL_RETRIES = 3
     reduction_pct = 1.0
@@ -111,7 +145,7 @@ def generate_swot_analysis(content: str,
         """
 
         try:
-            response = openai.ChatCompletion.create(
+            content_out = _chat_complete(
                 model=config.GPT_MODEL_CHAT,
                 messages=[
                     {"role": "system",
@@ -121,7 +155,7 @@ def generate_swot_analysis(content: str,
                 temperature=config.GPT_TEMPERATURE,
                 max_tokens=config.GPT_MAX_TOKENS
             )
-            return response["choices"][0]["message"]["content"].strip()
+            return content_out.strip()
 
         except (InvalidRequestError, RateLimitError) as e:
             err = str(e).lower()
@@ -140,8 +174,7 @@ def generate_solicitation_tags(content: str,
     """
     GPT tag generation with retry cap.
     """
-    import time, os, json, tiktoken
-    from openai import InvalidRequestError, RateLimitError
+    import tiktoken
 
     MAX_INTERNAL_RETRIES = 3
     reduction_pct = 1.0
@@ -160,7 +193,7 @@ def generate_solicitation_tags(content: str,
         """
 
         try:
-            response = openai.ChatCompletion.create(
+            content_out = _chat_complete(
                 model=config.GPT_MODEL_CHAT,
                 messages=[
                     {"role": "system",
@@ -170,7 +203,7 @@ def generate_solicitation_tags(content: str,
                 temperature=0.5,
                 max_tokens=256
             )
-            return [t.strip() for t in response["choices"][0]["message"]["content"].split(",") if t.strip()]
+            return [t.strip() for t in content_out.split(",") if t.strip()]
 
         except (InvalidRequestError, RateLimitError) as e:
             err = str(e).lower()
@@ -196,18 +229,12 @@ def _log_trunc(label: str, step: int, pct: float, base_sample: str, txt_sample: 
         }, f, indent=2, ensure_ascii=False)
 
 
-
 def generate_news_impact_paragraph(insights: str,
                                    article: dict,
                                    company_details: dict) -> str:
     """
     If an article is relevant, call GPT for a short paragraph explaining
     how this news might impact the company's performance if they secure the bid.
-    
-    :param insights: The previously generated insights about the solicitation.
-    :param article: A dict with 'title', 'description', 'content' for the news story.
-    :param company_details: A dict describing the company's name, strengths, past performance, etc.
-    :return: A short GPT-generated paragraph discussing potential positive/negative impacts.
     """
     prompt = f"""
     You are an analyst assessing how a recent news article might impact the performance or outcome
@@ -227,16 +254,16 @@ def generate_news_impact_paragraph(insights: str,
     affect the company's performance if they secure this bid.
     """
 
-    response = openai.ChatCompletion.create(
+    content_out = _chat_complete(
         model=config.GPT_MODEL_CHAT,
         messages=[
             {"role": "system", "content": "You are an expert in analyzing the impact of current events on bids."},
             {"role": "user", "content": prompt}
         ],
-        temperature=0.5,         # Slightly lower temp for more concise paragraphs
+        temperature=0.5,
         max_tokens=256
     )
-    return response["choices"][0]["message"]["content"].strip()
+    return content_out.strip()
 
 
 def generate_chart_insight(chart_data: pd.DataFrame, chart_type: str, company_details: dict) -> str:
@@ -262,7 +289,7 @@ def generate_chart_insight(chart_data: pd.DataFrame, chart_type: str, company_de
         Focus on competitive positioning, opportunities, or warnings based on the data.
         """
 
-        response = openai.ChatCompletion.create(
+        content_out = _chat_complete(
             model=config.GPT_MODEL_CHAT,
             messages=[
                 {"role": "system", "content": "You are a strategic analyst for government contracts."},
@@ -271,11 +298,10 @@ def generate_chart_insight(chart_data: pd.DataFrame, chart_type: str, company_de
             temperature=0.5,
             max_tokens=300
         )
-        return response["choices"][0]["message"]["content"].strip()
+        return content_out.strip()
 
     except Exception as e:
         return f"[Insight generation failed: {e}]"
-
 
 
 def fetch_perplexity_summary(company_name: str, perplexity_key: str) -> str:
@@ -310,8 +336,6 @@ def generate_competitor_positioning_insight(top_df: pd.DataFrame,
     Generate a strategic insight on how the client can position themselves
     against the top federal awardees based on live Perplexity web results.
     """
-    import openai
-
     # Pull top 10 company names
     top_companies = top_df["recipient_name"].head(10).tolist()
     company_profiles = {}
@@ -343,7 +367,7 @@ Be candid, strategic, and insightful. Avoid generic statements. Focus on specifi
 """
 
     try:
-        response = openai.ChatCompletion.create(
+        content_out = _chat_complete(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a strategic advisor for government contractors."},
@@ -352,16 +376,15 @@ Be candid, strategic, and insightful. Avoid generic statements. Focus on specifi
             temperature=0.5,
             max_tokens=700
         )
-        return response["choices"][0]["message"]["content"].strip()
+        return content_out.strip()
     except Exception as e:
         return f"[GPT Insight Generation Error: {e}]"
+
 
 def fetch_perplexity_year_insight(year: int, naics_code: str, perplexity_key: str) -> str:
     """
     Uses Perplexity API to summarize NAICS-specific federal spending and trends in a given year.
     """
-    import requests
-
     headers = {
         "Authorization": f"Bearer {perplexity_key}",
         "Content-Type": "application/json"
@@ -391,6 +414,7 @@ def fetch_perplexity_year_insight(year: int, naics_code: str, perplexity_key: st
     except Exception as e:
         return f"[Error fetching Perplexity summary for {year}: {e}]"
 
+
 def generate_trend_insight_by_year(yearly_df: pd.DataFrame,
                                    chart_title: str,
                                    client_info: dict,
@@ -399,9 +423,6 @@ def generate_trend_insight_by_year(yearly_df: pd.DataFrame,
     """
     Generates insight narrative with NAICS-specific context for year-by-year trends.
     """
-    import openai
-    import json
-
     recent_years = yearly_df["year"].astype(int).dropna().sort_values(ascending=False).unique()[:5]
     perplexity_insights = {}
 
@@ -435,7 +456,7 @@ Be specific. Avoid generic boilerplate.
 """
 
     try:
-        response = openai.ChatCompletion.create(
+        content_out = _chat_complete(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a federal contracting strategy advisor."},
@@ -444,6 +465,6 @@ Be specific. Avoid generic boilerplate.
             temperature=0.5,
             max_tokens=750
         )
-        return response["choices"][0]["message"]["content"].strip()
+        return content_out.strip()
     except Exception as e:
         return f"[GPT Insight Generation Error: {e}]"
