@@ -33,25 +33,26 @@ GPT_MODEL_EMBEDDING = "text-embedding-3-small"
 # 2) COMPANY / TEAM DETAILS
 # ------------------------------------------------------------------------------
 company_info = {
-    "company_name": "Acuity International",
+    "company_name": "Salus Worldwide Solutions",
     "core_competencies": (
-        "Acuity International delivers integrated mission solutions and global health services, "
-        "specializing in program and construction management, environmental remediation, base operations, "
-        "security services, occupational health, medical services, emergency and disaster response, and civil services. "
-        "Their expertise supports federal, state, and local governments in building safe, secure, healthy, and thriving communities worldwide."
+        "Salus Worldwide Solutions provides time-sensitive air transportation and mission logistics support for U.S. federal customers. "
+        "Registered capabilities span nonscheduled chartered passenger air transportation (NAICS 481211), scheduled passenger air transportation (481111), "
+        "other support activities for air transportation (488190), emergency and other relief services (624230), and logistics consulting (541614). "
+        "Program alignments reflected in PSC codes include logistics support (R706), air passenger transportation (V211), and relocation support (V301)."
     ),
     "past_performance": (
-        "With over 20 years of experience, Acuity International has a proven track record in providing rapid deployment, "
-        "emergency response, and comprehensive support services in challenging environments. "
-        "Their past performance includes successful delivery of medical services, disaster recovery, and base operations support "
-        "for various government agencies and international missions."
+        "Prime contractor to the Department of Homeland Security under Indefinite Delivery Contract 70RDA225D00000005 to provide Comprehensive Support to Removal Operations (CSRO) "
+        "for the Office for Strategy, Policy, and Plans. Under this vehicle, Delivery Order 70RDA225FR0000018 was awarded on May 22, 2025, with a potential value of about $194.7M "
+        "and reported obligations of roughly $185.8M as of August 20, 2025 (period of performance May 22, 2025 to November 21, 2025). "
+        "Work centers on rapid air services and associated operational support aligned to DHS mission requirements."
     ),
     "unique_strengths": (
-        "Acuity International's unique strengths lie in their ability to integrate advanced technology with expert talent "
-        "to deliver tailored solutions in complex environments. Their commitment to compliance, quality management, "
-        "and rapid response capabilities positions them as a trusted partner for critical missions globally."
+        "Small business headquartered in Arlington, Virginia (UEI EA4VD72SB1W3, CAGE 9H4F7). "
+        "Self-certifies as a Woman Owned Small Business in SAM.gov. "
+        "Focus on compliant, rapid-response operations with multi-NAICS registrations across transportation and logistics that support surge, charter, and mission coordination."
     ),
 }
+
 
 
 
