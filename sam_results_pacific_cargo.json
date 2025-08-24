@@ -1,5 +1,5 @@
-{
-  "694e173e6c674987bae1fecef6e2d422": {
+[
+  {
     "source": "SAM.gov",
     "sam_id": "694e173e6c674987bae1fecef6e2d422",
     "solicitation": "FA5025SS0004",
@@ -14,7 +14,7 @@
     "tags": "Guam-CNMI air freight; government cargo transport; hazardous materials shipping; scheduled air cargo service; surge flight capability",
     "news_impacts": []
   },
-  "916b71b95a2f453095b09c2a8c3714cc": {
+  {
     "source": "SAM.gov",
     "sam_id": "916b71b95a2f453095b09c2a8c3714cc",
     "solicitation": "FA502525QB013",
@@ -29,7 +29,7 @@
     "tags": "inter-island freight shipping; Saipan to Tinian transport; hazardous materials shipping; government cargo logistics; Blanket Purchase Agreement (BPA)",
     "news_impacts": []
   },
-  "16acde6a0ce84abfaf075dd043f3aee5": {
+  {
     "source": "SAM.gov",
     "sam_id": "16acde6a0ce84abfaf075dd043f3aee5",
     "solicitation": "70FB7025I00000007",
@@ -44,4 +44,4 @@
     "tags": "disaster logistics; multimodal transportation; FEMA RFI; American Samoa Guam CNMI; emergency response support",
     "news_impacts": []
   }
-}
+]
