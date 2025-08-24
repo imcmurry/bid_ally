@@ -10,7 +10,9 @@ import tiktoken
 from docx import Document as DocxDocument
 
 
-def download_attachment(reference: str, file_name: str) -> str or None:
+from typing import Optional
+
+def download_attachment(reference: str, file_name: str) -> Optional[str]:
     """
     Attempts to download an attachment using two possible URL formats.
     Now tries what was previously Method 2 first, then Method 1 as a fallback.
@@ -58,7 +60,7 @@ def download_attachment(reference: str, file_name: str) -> str or None:
     return None
 
 
-def download_attachment_sam(resource_id: str, filename: str) -> str or None:
+def download_attachment_sam(resource_id: str, filename: str) -> Optional[str]:
     """
     Download and save an attachment from SAM.gov based on its resource_id.
     Returns the local filepath if successful, else None.
