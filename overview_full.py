@@ -131,7 +131,7 @@ def render_overview():
                 st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
             if row.get("swot"):
                 st.markdown('<div class="big-section-title">SWOT</div>', unsafe_allow_html=True)
-                st.text(row['swot'])
+                st.markdown(row['swot'])
                 st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
             if row.get('news_impacts'):
                 st.markdown('<div class="big-section-title">Related News</div>', unsafe_allow_html=True)
