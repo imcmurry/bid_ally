@@ -129,7 +129,7 @@ def render_award_insights():
         st.markdown(f"**Insight:** {insight_2}")
 
         # ────────────── CHART 3 ──────────────
-        st.subheader("Award Value by State (Interactive Map)")
+        st.subheader("Award Value by State (Interactive Ma)")
         if not state_df.empty:
             # Ensure state codes are uppercase 2-letter for Plotly
             state_df = state_df.copy()
