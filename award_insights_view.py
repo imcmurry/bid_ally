@@ -130,38 +130,73 @@ def render_award_insights():
 
         # ────────────── CHART 3 ──────────────
         st.subheader("Award Value by State (Interactive Map)")
-        fig_map = px.choropleth(
-            state_df,
-            locations="state",
-            locationmode="USA-states",
-            color="total_awarded",
-            color_continuous_scale="Blues",
-            scope="usa",
-            labels={"total_awarded": "Total Awarded ($)"},
-            title="Total Federal Award Amount by State"
-        )
+        if not state_df.empty:
+            # Ensure state codes are uppercase 2-letter for Plotly
+            state_df = state_df.copy()
+            state_df["state"] = state_df["state"].astype(str).str.upper()
 
+            fig_map = px.choropleth(
+                state_df,
+                locations="state",
+                locationmode="USA-states",
+                color="total_awarded",
+                color_continuous_scale="Blues",
+                scope="usa",
+                labels={"total_awarded": "Total Awarded ($)"},
+                title="Total Federal Award Amount by State"
+            )
+            fig_map.update_layout(
+                height=520,
+                geo=dict(lakecolor="white"),
+                coloraxis_colorbar=dict(title="Total ($)", tickformat=",")
+            )
+            st.plotly_chart(fig_map, use_container_width=True)
+        else:
+            st.info("No state-level totals to display.")
 
         # ────────────── CHART 4 ──────────────
         st.subheader("Average Year-over-Year Growth by State")
-        state_yearly_df = state_yearly_df.sort_values(["state", "year"])
-        state_yearly_df["year"] = state_yearly_df["year"].astype(int)
-        state_yearly_df["pct_change"] = state_yearly_df.groupby("state")["total_awarded"].pct_change()
-        growth_summary = (
-            state_yearly_df.groupby("state")["pct_change"]
-            .mean()
-            .reset_index()
-            .rename(columns={"pct_change": "avg_growth_rate"})
-        )
-        growth_summary["avg_growth_rate_percent"] = growth_summary["avg_growth_rate"] * 100
-        fig_growth = px.choropleth(
-            growth_summary,
-            locations="state",
-            locationmode="USA-states",
-            color="avg_growth_rate_percent",
-            color_continuous_scale=px.colors.diverging.RdYlGn,
-            range_color=(-50, 100),
-            scope="usa",
-            labels={"avg_growth_rate_percent": "Avg YoY Growth (%)"},
-            title="Average YoY Federal Contract Growth by State"
-        )
+        if not state_yearly_df.empty:
+            sdy = state_yearly_df.copy()
+            sdy["year"] = pd.to_numeric(sdy["year"], errors="coerce")
+            sdy = sdy.dropna(subset=["year"])
+            sdy["year"] = sdy["year"].astype(int)
+            sdy = sdy.sort_values(["state", "year"])
+
+            # Compute YoY growth per state
+            sdy["pct_change"] = sdy.groupby("state")["total_awarded"].pct_change()
+
+            # Clean impossible/infinite values (e.g., prior year = 0)
+            sdy = sdy.replace([pd.NA, pd.NaT, float("inf"), float("-inf")], pd.NA)
+            sdy["pct_change"] = sdy["pct_change"].astype(float)
+            sdy = sdy.dropna(subset=["pct_change"])
+
+            growth_summary = (
+                sdy.groupby("state", as_index=False)["pct_change"]
+                .mean()
+                .rename(columns={"pct_change": "avg_growth_rate"})
+            )
+            if growth_summary.empty:
+                st.info("Not enough year-over-year data to compute growth.")
+            else:
+                growth_summary["state"] = growth_summary["state"].astype(str).str.upper()
+                growth_summary["avg_growth_rate_percent"] = growth_summary["avg_growth_rate"] * 100
+
+                fig_growth = px.choropleth(
+                    growth_summary,
+                    locations="state",
+                    locationmode="USA-states",
+                    color="avg_growth_rate_percent",
+                    color_continuous_scale=px.colors.diverging.RdYlGn,
+                    range_color=(-50, 100),
+                    scope="usa",
+                    labels={"avg_growth_rate_percent": "Avg YoY Growth (%)"},
+                    title="Average YoY Federal Contract Growth by State"
+                )
+                fig_growth.update_layout(
+                    height=520,
+                    coloraxis_colorbar=dict(title="Avg YoY (%)", ticksuffix="%")
+                )
+                st.plotly_chart(fig_growth, use_container_width=True)
+        else:
+            st.info("No state-year trend data to display.")
