@@ -33,25 +33,30 @@ GPT_MODEL_EMBEDDING = "text-embedding-3-small"
 # 2) COMPANY / TEAM DETAILS
 # ------------------------------------------------------------------------------
 company_info = {
-    "company_name": "Salus Worldwide Solutions",
+    "company_name": "Thorndike Mill / Thorndike Electric",
     "core_competencies": (
-        "Salus Worldwide Solutions provides time-sensitive air transportation and mission logistics support for U.S. federal customers. "
-        "Registered capabilities span nonscheduled chartered passenger air transportation (NAICS 481211), scheduled passenger air transportation (481111), "
-        "other support activities for air transportation (488190), emergency and other relief services (624230), and logistics consulting (541614). "
-        "Program alignments reflected in PSC codes include logistics support (R706), air passenger transportation (V211), and relocation support (V301)."
+        "Thorndike Mill is a small hydroelectric power producer and electrical services provider specializing in "
+        "run-of-river and low-impact hydropower systems. The company develops, owns, operates, and maintains "
+        "hydroelectric facilities that generate electricity independent of the standard utility grid, with a focus "
+        "on renewable, resilient, and locally sited generation. Capabilities include hydroelectric plant operations, "
+        "electrical infrastructure maintenance, system upgrades, and integration of distributed generation assets "
+        "supporting off-grid or islanded power systems."
     ),
     "past_performance": (
-        "Prime contractor to the Department of Homeland Security under Indefinite Delivery Contract 70RDA225D00000005 to provide Comprehensive Support to Removal Operations (CSRO) "
-        "for the Office for Strategy, Policy, and Plans. Under this vehicle, Delivery Order 70RDA225FR0000018 was awarded on May 22, 2025, with a potential value of about $194.7M "
-        "and reported obligations of roughly $185.8M as of August 20, 2025 (period of performance May 22, 2025 to November 21, 2025). "
-        "Work centers on rapid air services and associated operational support aligned to DHS mission requirements."
+        "Thorndike Mill operates an established small-scale hydroelectric facility, delivering continuous renewable "
+        "power through long-term operation and maintenance of hydro assets. The company’s experience centers on "
+        "practical, real-world operation of hydroelectric generation, including electrical system upkeep, reliability, "
+        "and sustained power production over time rather than one-off construction projects."
     ),
     "unique_strengths": (
-        "Small business headquartered in Arlington, Virginia (UEI EA4VD72SB1W3, CAGE 9H4F7). "
-        "Self-certifies as a Woman Owned Small Business in SAM.gov. "
-        "Focus on compliant, rapid-response operations with multi-NAICS registrations across transportation and logistics that support surge, charter, and mission coordination."
+        "Owner-operator model with hands-on experience managing hydroelectric generation assets end to end, "
+        "from electrical systems to ongoing operations and maintenance. "
+        "Deep familiarity with low-impact, run-of-river hydro suited for microgrid and distributed generation contexts. "
+        "Positioned to support resilient power applications where continuous local generation, grid independence, "
+        "and long-term operational reliability are prioritized."
     ),
 }
+
 
 
 
