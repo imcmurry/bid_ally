@@ -13,7 +13,7 @@ from award_insights_view import render_award_insights
 # ────────────────────────────────────────────────────────────────────────────
 
 ROOT = Path(__file__).parent
-DATA_PATH = ROOT / "sam_results_pacific_cargo.json"
+DATA_PATH = ROOT / "combined_results_guam.json"
 
 @st.cache_data(show_spinner=False)
 def load_data(path: Path) -> pd.DataFrame:

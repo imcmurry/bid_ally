@@ -134,7 +134,7 @@ SAM_SEARCH_KEYWORDS = ["microgrid"]
 SAM_REGIONS = []
 
 ROOT = Path(__file__).parent
-DATA_PATH = ROOT / "sam_results_microgrid.json"
+DATA_PATH = ROOT / "combined_results_guam.json"
 
 DB_PATH = ROOT / "bid_ally.db"
 
