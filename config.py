@@ -33,29 +33,36 @@ GPT_MODEL_EMBEDDING = "text-embedding-3-small"
 # 2) COMPANY / TEAM DETAILS
 # ------------------------------------------------------------------------------
 company_info = {
-    "company_name": "Thorndike Mill / Thorndike Electric",
+    "company_name": "Bridger Aerospace",
     "core_competencies": (
-        "Thorndike Mill is a small hydroelectric power producer and electrical services provider specializing in "
-        "run-of-river and low-impact hydropower systems. The company develops, owns, operates, and maintains "
-        "hydroelectric facilities that generate electricity independent of the standard utility grid, with a focus "
-        "on renewable, resilient, and locally sited generation. Capabilities include hydroelectric plant operations, "
-        "electrical infrastructure maintenance, system upgrades, and integration of distributed generation assets "
-        "supporting off-grid or islanded power systems."
+        "Bridger Aerospace is a U.S.-based aerial firefighting and special-mission aviation company "
+        "headquartered in Montana. The company specializes in wildfire suppression, disaster response, "
+        "and emergency aviation operations, with a core capability centered on amphibious water-scooping "
+        "aircraft operations. Bridger operates a dedicated fleet of CL-415EAF 'Super Scooper' aircraft, "
+        "designed for rapid, low-altitude water delivery directly onto active fires. Capabilities include "
+        "high-tempo aerial firefighting, precision water drops, mission planning, airspace coordination, "
+        "and deployment of aviation assets in permissive, non-combat environments supporting civil and "
+        "government authorities."
     ),
     "past_performance": (
-        "Thorndike Mill operates an established small-scale hydroelectric facility, delivering continuous renewable "
-        "power through long-term operation and maintenance of hydro assets. The company’s experience centers on "
-        "practical, real-world operation of hydroelectric generation, including electrical system upkeep, reliability, "
-        "and sustained power production over time rather than one-off construction projects."
+        "Bridger Aerospace supports U.S. wildfire response efforts through federal task orders and seasonal "
+        "mobilizations, including operations under agencies such as the U.S. Forest Service. The company "
+        "has demonstrated sustained operational performance conducting repeated, high-frequency water-drop "
+        "missions during active wildfire seasons. Past performance emphasizes real-world execution of "
+        "aerial firefighting operations, coordination with federal and state incident command structures, "
+        "and reliable delivery of time-critical aviation services rather than one-time or experimental missions."
     ),
     "unique_strengths": (
-        "Owner-operator model with hands-on experience managing hydroelectric generation assets end to end, "
-        "from electrical systems to ongoing operations and maintenance. "
-        "Deep familiarity with low-impact, run-of-river hydro suited for microgrid and distributed generation contexts. "
-        "Positioned to support resilient power applications where continuous local generation, grid independence, "
-        "and long-term operational reliability are prioritized."
+        "Purpose-built fleet of amphibious CL-415EAF aircraft optimized for rapid water scooping from nearby "
+        "lakes, rivers, and coastal environments, enabling high sortie rates without reliance on fixed tanker bases. "
+        "Operational expertise in low-altitude, precision aerial delivery for structure defense, infrastructure "
+        "protection, and urban-interface fire suppression. Well positioned for humanitarian assistance, disaster "
+        "relief, and installation resilience missions where speed, repeatability, and reduced logistics footprint "
+        "are critical. Commercial operator model aligns with government contracting approaches that favor scalable, "
+        "contracted aviation capabilities in permissive operating environments."
     ),
 }
+
 
 
 
@@ -130,11 +137,11 @@ GPT_MAX_TOKENS = 1024
 
 
 #8) SAM SETTINGS
-SAM_SEARCH_KEYWORDS = ["microgrid"]
+SAM_SEARCH_KEYWORDS = ["Philippines Aeromedical"]
 SAM_REGIONS = []
 
 ROOT = Path(__file__).parent
-DATA_PATH = ROOT / "combined_results_guam.json"
+DATA_PATH = ROOT / "combined_results_fire.json"
 
 DB_PATH = ROOT / "bid_ally.db"
 
