@@ -137,11 +137,11 @@ GPT_MAX_TOKENS = 1024
 
 
 #8) SAM SETTINGS
-SAM_SEARCH_KEYWORDS = ["Philippines Aeromedical"]
+SAM_SEARCH_KEYWORDS = ["VIPR I-BPA for Incident Base"]
 SAM_REGIONS = []
 
 ROOT = Path(__file__).parent
-DATA_PATH = ROOT / "combined_results_fire.json"
+DATA_PATH = ROOT / "combined_results_fire1.json"
 
 DB_PATH = ROOT / "bid_ally.db"
 

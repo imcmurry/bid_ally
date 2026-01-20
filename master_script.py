@@ -35,7 +35,7 @@ def normalize_sam_row(row):
         "news_impacts": row["news_impacts"]
     }
 
-def run_combined_pipeline(out_json="combined_results_fire.json", out_csv="combined_results_fire.csv"):
+def run_combined_pipeline(out_json="combined_results_fire1.json", out_csv="combined_results_fire1.csv"):
     print("🚀 Running EU Tenders pipeline...")
     eu_data = run_eu_pipeline()
     print("🚀 Running SAM.gov pipeline...")
