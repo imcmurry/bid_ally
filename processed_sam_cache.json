@@ -1,5 +1,5 @@
-[
-  {
+{
+  "c2ab953e4aef440ba14476d6fedad159": {
     "source": "SAM.gov",
     "sam_id": "c2ab953e4aef440ba14476d6fedad159",
     "solicitation": "12569R25Q7004",
@@ -14,7 +14,7 @@
     "tags": "government procurement; amendment 0004; generators; portable power systems; payment terms",
     "news_impacts": []
   },
-  {
+  "720b6bfa9f52478587ea1a9fa0c60903": {
     "source": "SAM.gov",
     "sam_id": "720b6bfa9f52478587ea1a9fa0c60903",
     "solicitation": "12569R25Q7004",
@@ -29,7 +29,7 @@
     "tags": "Incident Base Unit; Wildland Fire Suppression; Pacific Southwest Region; Small Business Set-Aside; Virtual Incident Procurement (VIPR)",
     "news_impacts": []
   },
-  {
+  "cf1b718898a84469b5194faafa4f4999": {
     "source": "SAM.gov",
     "sam_id": "cf1b718898a84469b5194faafa4f4999",
     "solicitation": "12569R25Q7000",
@@ -44,7 +44,7 @@
     "tags": "Incident Base Units; Solicitation Cancellation; Region 5; Revised Solicitation; USDA Contract",
     "news_impacts": []
   },
-  {
+  "0cee47ea13364451bd0aa1c0df97a231": {
     "source": "SAM.gov",
     "sam_id": "0cee47ea13364451bd0aa1c0df97a231",
     "solicitation": "12569R25Q7000",
@@ -59,4 +59,4 @@
     "tags": "USFS Region 5 Incident Base Unit; fire suppression services; all-hazard response; Small Business set-aside; VIPR procurement system",
     "news_impacts": []
   }
-]
+}
